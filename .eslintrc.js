@@ -14,6 +14,12 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 12,
+    sourceType: "module",
+  },
+  settings: {
+    node: {
+      tryExtensions: [".js", ".json", ".node", ".ts"],
+    },
   },
   rules: {
     "node/no-unsupported-features/es-syntax": [
