@@ -18,7 +18,7 @@ export abstract class UniswapV2Clone extends Dex {
     hre: HardhatRuntimeEnvironment,
     callback: swapEventCallback
   ): void {
-    const provider = getWebsocketProvider("ethereum", hre);
+    const provider = getWebsocketProvider(this.network, hre);
     const pool = new hre.ethers.Contract(pair, this.pairAbi, provider);
     pool.on("Swap", callback);
   }

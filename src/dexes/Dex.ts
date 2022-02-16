@@ -1,3 +1,5 @@
+import { NetworkName } from "../common/types";
+
 export abstract class Dex {
-  network: string = "";
+  network: NetworkName = "ethereum";
 }
