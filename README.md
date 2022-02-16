@@ -34,6 +34,11 @@ Trader Joe's contracts are listed on the [official docs](https://docs.traderjoex
 * [JoeFactory](https://snowtrace.io/address/0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10)
 * [JoeToken](https://snowtrace.io/address/0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd)
 
+The contract addresses of Trader Joe's pairs can be found on their [Analytics Page](https://analytics.traderjoexyz.com/pairs):
+
+* [USDC.e-WAVAX Pair](https://analytics.traderjoexyz.com/pairs/0xa389f9430876455c36478deea9769b7ca4e3ddb1)
+* [AVAX-TUS Pair](https://analytics.traderjoexyz.com/pairs/0x565d20bd591b00ead0c927e4b6d7dd8a33b0b319)
+
 # To do
 
 * Listen to Trader Joe's pair creations

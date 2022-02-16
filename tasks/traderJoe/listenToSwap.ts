@@ -1,5 +1,5 @@
 /**
- * Listen to swaps on Trader Joe
+ * Listen to swaps on the pair USDC.e-WAVAX on Trader Joe
  */
 
 import { task } from "hardhat/config";
@@ -11,15 +11,15 @@ task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.").setAction(
     // CONFIG
     const { ethers } = hre;
     const addresses = {
-      router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
+      pool: "0xa389f9430876455c36478deea9769b7ca4e3ddb1", // USDC.e-WAVAX pair
     };
 
     // ACCOUNT
     const provider = getWebsocketProvider("avalanche", hre);
 
     // CONTRACTS
-    const router = new ethers.Contract(
-      addresses.router,
+    const pool = new ethers.Contract(
+      addresses.pool,
       [
         "event Swap(address indexed sender, uint256 amount0In, uint256 amount1In, uint256 amount0Out, uint256 amount1Out, address indexed to)",
       ],
@@ -27,23 +27,23 @@ task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.").setAction(
     );
 
     // EXEC
-    router.on(
+    pool.on(
       "Swap",
       async (sender, amount0In, amount1In, amount0Out, amount1Out, to, tx) => {
         console.log(new Date());
         console.log(`
-        New swap detected
-        =================
-        sender: ${sender}
-        amount0In: ${ethers.utils.formatUnits(amount0In, 6)}
-        amount1In: ${ethers.utils.formatUnits(amount1In)}
-        amount0Out: ${ethers.utils.formatUnits(amount0Out, 6)}
-        amount1Out: ${ethers.utils.formatUnits(amount1Out)}
-        to: ${to}
-        block: ${tx.blockNumber}
-      `);
+          New swap detected
+          =================
+          sender: ${sender}
+          amount0In: ${ethers.utils.formatUnits(amount0In, 6)}
+          amount1In: ${ethers.utils.formatUnits(amount1In)}
+          amount0Out: ${ethers.utils.formatUnits(amount0Out, 6)}
+          amount1Out: ${ethers.utils.formatUnits(amount1Out)}
+          to: ${to}
+          block: ${tx.blockNumber}
+        `);
       }
     );
-    wait();
+    return wait();
   }
 );

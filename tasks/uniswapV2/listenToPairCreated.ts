@@ -44,5 +44,5 @@ task(
       pairAddress: ${pairAddress}
     `);
   });
-  wait();
+  return wait();
 });

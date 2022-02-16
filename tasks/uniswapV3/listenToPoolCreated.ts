@@ -34,14 +34,14 @@ task(
   console.log(new Date());
   factory.on("PoolCreated", async (token0, token1, fee, tickSpacing, pool) => {
     console.log(`
-        New pool detected
-        =================
-        token0: ${token0}
-        token1: ${token1}
-        fee: ${fee}
-        tickSpacing: ${tickSpacing}
-        pool: ${pool}
-      `);
+      New pool detected
+      =================
+      token0: ${token0}
+      token1: ${token1}
+      fee: ${fee}
+      tickSpacing: ${tickSpacing}
+      pool: ${pool}
+    `);
   });
-  wait();
+  return wait();
 });
