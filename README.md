@@ -18,6 +18,11 @@ Snipe liquidity on popular decentralized exchanges.
 * Uniswap V2: USDC-ETH Pool > [Etherscan](https://etherscan.io/address/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc#code), [Info](https://v2.info.uniswap.org/pair/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc)
 * Uniswap V2: USDC-ETH Pool token > [Etherscan](https://etherscan.io/token/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc)
 
+The contract addresses of Uniswap V2's pairs can be found on their [Info Site](https://v2.info.uniswap.org/pairs):
+
+* [USDC-ETH V2 Pair](https://etherscan.io/address/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc#code)
+* [ETH-USDT V2 Pair](https://etherscan.io/address/0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852#code)
+
 ### Uniswap v3 - Ethereum
 
 * [Uniswap V3: Factory](https://etherscan.io/address/0x1f98431c8ad98523631ae4a59f267346ea31f984#code)
@@ -36,16 +41,20 @@ Trader Joe's contracts are listed on the [official docs](https://docs.traderjoex
 
 The contract addresses of Trader Joe's pairs can be found on their [Analytics Page](https://analytics.traderjoexyz.com/pairs):
 
-* [USDC.e-WAVAX Pair](https://analytics.traderjoexyz.com/pairs/0xa389f9430876455c36478deea9769b7ca4e3ddb1)
-* [AVAX-TUS Pair](https://analytics.traderjoexyz.com/pairs/0x565d20bd591b00ead0c927e4b6d7dd8a33b0b319)
+* [USDC.e-WAVAX Pair](https://snowtrace.io/address/0xa389f9430876455c36478deea9769b7ca4e3ddb1#code)
+* [AVAX-TUS Pair](https://snowtrace.io/address/0x565d20bd591b00ead0c927e4b6d7dd8a33b0b319#code)
 
 # To do
 
-* Listen to Trader Joe's pair creations
-* Place contract ABIs in artifacts folder
+* Listen to pair creation method in DEX class
+* Listen to add liquidity in DEX class
+* Task to listen to add liquidity
+* In order to snipe should we listen to add liquidity or pair creation?
 
 # Done
 
+* DEX classes: UniswapV2 and TraderJoe
+* Listen to Trader Joe's pair creations
 * Sort out .env
 * Use Hardhat signers in scripts instead of relying on dotenv 
 * Migrate project to Hardhat & move scripts to tasks
