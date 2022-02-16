@@ -1,17 +1,22 @@
 /**
- * Listen to swaps on the pair USDC.e-WAVAX on Trader Joe
+ * Listen to swaps on Trader Joe
  */
 
 import { task } from "hardhat/config";
 import { wait } from "../../src/helpers/general";
 import { getWebsocketProvider } from "../../src/helpers/providers";
 
-task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.").setAction(
-  async (taskArgs, hre) => {
+task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.")
+  .addOptionalPositionalParam(
+    "pair",
+    "Pair to spy, default is USDC.e-WAVAX",
+    "0xa389f9430876455c36478deea9769b7ca4e3ddb1" // USDC.e-WAVAX pair
+  )
+  .setAction(async ({ pair }, hre) => {
     // CONFIG
     const { ethers } = hre;
     const addresses = {
-      pool: "0xa389f9430876455c36478deea9769b7ca4e3ddb1", // USDC.e-WAVAX pair
+      pool: pair,
     };
 
     // ACCOUNT
@@ -45,5 +50,4 @@ task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.").setAction(
       }
     );
     return wait();
-  }
-);
+  });
