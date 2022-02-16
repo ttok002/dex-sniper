@@ -27,5 +27,6 @@ module.exports = {
       { ignores: ["modules"] },
     ],
     "node/no-unpublished-import": 0,
+    "node/no-extraneous-import": 0,
   },
 };

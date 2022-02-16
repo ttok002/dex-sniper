@@ -1,41 +1,29 @@
-import { HardhatUserConfig, task } from "hardhat/config";
-import "@nomiclabs/hardhat-etherscan";
+import { HardhatUserConfig } from "hardhat/config";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
-import "hardhat-gas-reporter";
-import "solidity-coverage";
 import "./tasks/index";
+import { getenv } from "./src/common/dotenv";
 
 /**
  * Configuration for Harhat
  * Go to https://hardhat.org/config/ to learn more
  */
 const config: HardhatUserConfig = {
-  solidity: "0.8.4",
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    avalanche: {
+      url: getenv("AVALANCHE_URL"),
+      accounts: getenv("AVALANCHE_PRIVATE_KEY")
+        ? [getenv("AVALANCHE_PRIVATE_KEY")]
+        : [],
+      chainId: 43114,
     },
-  },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    ethereum: {
+      url: getenv("ETHEREUM_URL"),
+      accounts: getenv("ETHEREUM_PRIVATE_KEY")
+        ? [getenv("ETHEREUM_PRIVATE_KEY")]
+        : [],
+    },
   },
 };
 
 export default config;
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});

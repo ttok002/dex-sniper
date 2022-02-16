@@ -25,3 +25,18 @@ export function secondArg() {
 export function thirdArg() {
   return process.argv[4] ?? null;
 }
+
+/**
+ * Return a promise that never resolves; useful to
+ * make a Hardhat run indefinitely.
+ *
+ * Optionally specify a number of milli seconds to have
+ * the promise resolve after that amount of time.
+ */
+export function wait(nMilliseconds: number = 0) {
+  if (!nMilliseconds) {
+    return new Promise(() => {});
+  } else {
+    return new Promise((resolve) => setTimeout(resolve, nMilliseconds));
+  }
+}
