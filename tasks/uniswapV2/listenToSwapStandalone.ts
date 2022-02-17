@@ -20,7 +20,7 @@ task("uniswapV2:listenToSwapStandalone", "Listen to swaps on Uniswap.")
     };
 
     // ACCOUNT
-    const provider = getWebsocketProvider("ethereum", hre);
+    const provider = getWebsocketProvider(hre);
 
     // CONTRACTS
     const pool = new ethers.Contract(

@@ -20,7 +20,7 @@ task("traderJoe:listenToSwapStandalone", "Listen to swaps on Trader Joe.")
     };
 
     // ACCOUNT
-    const provider = getWebsocketProvider("avalanche", hre);
+    const provider = getWebsocketProvider(hre);
 
     // CONTRACTS
     const pool = new ethers.Contract(

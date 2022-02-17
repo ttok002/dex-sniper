@@ -15,7 +15,7 @@ task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.")
     "0xa389f9430876455c36478deea9769b7ca4e3ddb1" // USDC.e-WAVAX pair
   )
   .setAction(async ({ pair }, hre) => {
-    const dex = new TraderJoe(getWebsocketProvider("avalanche", hre));
+    const dex = new TraderJoe(getWebsocketProvider(hre));
     dex.listenToSwap(pair, printSwapEvent);
     return wait();
   });

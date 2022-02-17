@@ -22,7 +22,7 @@ task(
   };
 
   // ACCOUNT
-  const provider = getWebsocketProvider("ethereum", hre);
+  const provider = getWebsocketProvider(hre);
 
   // CONTRACTS
   const factory = new ethers.Contract(

@@ -19,9 +19,9 @@ task(
     "0xa389f9430876455c36478deea9769b7ca4e3ddb1" // USDC.e-WAVAX pair
   )
   .addOptionalParam("n", "Number of blocks to get", 1, types.int)
-  .addOptionalParam("csv", "Dump table to givel fine in CSV format")
+  .addOptionalParam("csv", "Dump table to given file in CSV format")
   .setAction(async ({ pair, n, csv }, hre) => {
-    const provider = getWebsocketProvider("avalanche", hre);
+    const provider = getWebsocketProvider(hre);
     const dex = new TraderJoe(provider);
     const [fromBlock, toBlock] = await getBlockRange(n, provider);
     const swaps = await dex.getSwapHistoryTable(pair, fromBlock, toBlock);
