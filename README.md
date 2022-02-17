@@ -46,6 +46,7 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
+* Use Hardhat typechain mechanism to automatically generate types for event args
 * Script to track first N swaps for the given pair
 * Listen to pair creation method in DEX class
 * Listen to add liquidity in DEX class

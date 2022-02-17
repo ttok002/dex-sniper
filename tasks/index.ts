@@ -8,3 +8,4 @@ import "./uniswapV2/listenToSwapStandalone";
 import "./uniswapV3/listenToPoolCreated";
 import "./traderJoe/listenToSwap";
 import "./traderJoe/listenToSwapStandalone";
+import "./traderJoe/getSwapHistory";
