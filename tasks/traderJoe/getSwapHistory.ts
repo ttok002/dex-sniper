@@ -6,6 +6,8 @@ import { task, types } from "hardhat/config";
 import { TraderJoe } from "../../src/dexes/uniswapV2Clones/TraderJoe";
 import { getWebsocketProvider } from "../../src/helpers/providers";
 import { getBlockRange } from "../../src/helpers/blocks";
+// @ts-ignore
+import ObjectsToCsv from "objects-to-csv";
 
 task(
   "traderJoe:getSwapHistory",
@@ -17,11 +19,17 @@ task(
     "0xa389f9430876455c36478deea9769b7ca4e3ddb1" // USDC.e-WAVAX pair
   )
   .addOptionalParam("n", "Number of blocks to get", 1, types.int)
-  .setAction(async ({ pair, n }, hre) => {
+  .addOptionalParam("csv", "Dump table to givel fine in CSV format")
+  .setAction(async ({ pair, n, csv }, hre) => {
     const provider = getWebsocketProvider("avalanche", hre);
     const dex = new TraderJoe(provider);
     const [fromBlock, toBlock] = await getBlockRange(n, provider);
-    // const swaps = await dex.getSwapHistory(pair, fromBlock, toBlock);
     const swaps = await dex.getSwapHistoryTable(pair, fromBlock, toBlock);
-    console.log(swaps);
+    if (!csv) {
+      console.log(swaps);
+      return;
+    }
+    const csvFile = new ObjectsToCsv(swaps);
+    await csvFile.toDisk(csv);
+    console.log(`Ouptut saved to file ${csv}`);
   });
