@@ -6,6 +6,7 @@ import { task } from "hardhat/config";
 import { TraderJoe } from "../../src/dexes/uniswapV2Clones/TraderJoe";
 import { printSwapEvent } from "../../src/helpers/debug";
 import { wait } from "../../src/helpers/general";
+import { getWebsocketProvider } from "../../src/helpers/providers";
 
 task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.")
   .addOptionalPositionalParam(
@@ -14,7 +15,7 @@ task("traderJoe:listenToSwap", "Listen to swaps on Trader Joe.")
     "0xa389f9430876455c36478deea9769b7ca4e3ddb1" // USDC.e-WAVAX pair
   )
   .setAction(async ({ pair }, hre) => {
-    const dex = new TraderJoe();
-    dex.listenToSwap(pair, hre, printSwapEvent);
+    const dex = new TraderJoe(getWebsocketProvider("avalanche", hre));
+    dex.listenToSwap(pair, printSwapEvent);
     return wait();
   });

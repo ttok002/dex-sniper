@@ -46,6 +46,7 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
+* Script to track first N swaps for the given pair
 * Listen to pair creation method in DEX class
 * Listen to add liquidity in DEX class
 * Task to listen to add liquidity
