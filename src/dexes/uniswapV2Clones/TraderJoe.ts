@@ -4,6 +4,7 @@ export class TraderJoe extends UniswapV2Clone {
   supportedNetworks: string[] = ["avalanche"];
   routerAddress = "0x7a250d5630b4cf539739df2c5dacb4c659f2488d";
   factoryAddress = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-  routerAbi = require("./abi/traderJoeRouter.json");
-  pairAbi = require("./abi/traderJoePair.json");
+  routerAbi = require("./abi/traderJoe/router.json");
+  pairAbi = require("./abi/traderJoe/pair.json");
+  factoryAbi = require("./abi/traderJoe/factory.json");
 }

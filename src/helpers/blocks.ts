@@ -5,7 +5,7 @@ import { Provider } from "@ethersproject/providers";
  * - the latest block number minus N
  * - the latest block number
  */
-export async function getBlockRange(n: number, provider: Provider) {
+export async function getMostRecentBlocksRange(n: number, provider: Provider) {
   const latest = await provider.getBlockNumber();
   return [latest - n, latest];
 }

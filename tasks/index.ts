@@ -4,7 +4,9 @@
  */
 
 // General purposes tasks
-import "./uniswapV2Clones/getSwapHistory";
+import "./uniswapV2Clones/getRecentSwaps";
+import "./uniswapV2Clones/getPairCreationTx";
+import "./uniswapV2Clones/getFirstSwaps";
 
 // DEX-specific tasks
 import "./uniswapV2/listenToPairCreated";
@@ -13,4 +15,4 @@ import "./uniswapV2/listenToSwapStandalone";
 import "./uniswapV3/listenToPoolCreated";
 import "./traderJoe/listenToSwap";
 import "./traderJoe/listenToSwapStandalone";
-import "./traderJoe/getSwapHistory";
+import "./traderJoe/getRecentSwaps";
