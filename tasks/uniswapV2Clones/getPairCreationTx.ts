@@ -1,7 +1,3 @@
-/**
- * Given a pair, get the tx at which it was created
- */
-
 import { task } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { getWebsocketProvider } from "../../src/helpers/providers";

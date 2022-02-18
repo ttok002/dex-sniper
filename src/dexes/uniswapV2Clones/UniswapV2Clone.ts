@@ -91,7 +91,7 @@ export abstract class UniswapV2Clone extends Dex {
     const events = await factory.queryFilter(filter);
     if (events.length === 0) {
       throw new Error(
-        `No PairCreated event found for pair ${token0} - ${token1}. Try inverting the tokens?`
+        `PairCreated event NOT found for pair ${token0} - ${token1}. Try inverting the tokens?`
       );
     } else if (events.length > 1) {
       console.log(
@@ -99,5 +99,17 @@ export abstract class UniswapV2Clone extends Dex {
       );
     }
     return events[0].getTransactionReceipt();
+  }
+
+  /**
+   * Return the list of pair creation events.
+   */
+  async getPairCreationHistory(
+    fromBlock?: number,
+    toBlock?: number
+  ): Promise<Event[]> {
+    const factory = this.getFactory();
+    const filter = factory.filters.PairCreated();
+    return await factory.queryFilter(filter, fromBlock, toBlock);
   }
 }

@@ -1,0 +1,12 @@
+export const ERC20 = {
+  USDCE: "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664",
+  WAVAX: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
+};
+
+export const PAIRS_TRADERJOE = {
+  USDCE_WAVAX: {
+    pair: "0xa389f9430876455c36478deea9769b7ca4e3ddb1",
+    token0: ERC20.USDCE,
+    token1: ERC20.WAVAX,
+  },
+};

@@ -5,6 +5,7 @@
 
 // General purposes tasks
 import "./uniswapV2Clones/getRecentSwaps";
+import "./uniswapV2Clones/getRecentPairCreations";
 import "./uniswapV2Clones/getPairCreationTx";
 import "./uniswapV2Clones/getFirstSwaps";
 
