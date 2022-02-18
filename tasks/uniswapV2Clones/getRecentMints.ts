@@ -5,7 +5,7 @@ import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
 
-task("uniswapV2Clone:getRecentSwaps", "Get recent swaps for the given pair")
+task("uniswapV2Clone:getRecentMints", "Get recent mints for the given pair")
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
   .addPositionalParam("pair", "Address of the pair to analyze")
   .addOptionalParam("nblocks", "Number of blocks to get", 10, types.int)
@@ -23,7 +23,7 @@ task("uniswapV2Clone:getRecentSwaps", "Get recent swaps for the given pair")
       nblocks,
       provider
     );
-    const swaps = await dex.getSwapHistoryTable({
+    const mints = await dex.getMintHistoryTable({
       pair,
       fromBlock,
       toBlock,
@@ -31,10 +31,10 @@ task("uniswapV2Clone:getRecentSwaps", "Get recent swaps for the given pair")
       digits1,
     });
     if (!csv) {
-      console.log(swaps);
+      console.log(mints);
       return;
     }
-    const csvFile = new ObjectsToCsv(swaps);
+    const csvFile = new ObjectsToCsv(mints);
     await csvFile.toDisk(csv);
     console.log(`Output saved to file ${csv}`);
   });

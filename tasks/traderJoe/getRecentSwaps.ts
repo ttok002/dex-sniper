@@ -20,7 +20,7 @@ task(
     const provider = getWebsocketProvider(hre);
     const dex = new TraderJoe(provider);
     const [fromBlock, toBlock] = await getMostRecentBlocksRange(n, provider);
-    const swaps = await dex.getSwapHistoryTable(pair, fromBlock, toBlock);
+    const swaps = await dex.getSwapHistoryTable({ pair, fromBlock, toBlock });
     if (!csv) {
       console.log(swaps);
       return;

@@ -30,15 +30,26 @@ export interface SwapEvent {
 }
 
 /**
- * Info concerning a swap on a DEX
+ * Info concerning a swap on a DEX pair
  */
 export interface SwapRecord {
   blockNumber: number;
   sender: string;
-  amount0In: BigNumber;
-  amount1In: BigNumber;
-  amount0Out: BigNumber;
-  amount1Out: BigNumber;
+  amount0In: string;
+  amount1In: string;
+  amount0Out: string;
+  amount1Out: string;
   to: string;
+  tx: string;
+}
+
+/**
+ * Info concerning a mint on a DEX pair
+ */
+export interface MintRecord {
+  blockNumber: number;
+  sender: string;
+  amount0: string;
+  amount1: string;
   tx: string;
 }

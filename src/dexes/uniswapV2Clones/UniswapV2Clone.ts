@@ -1,7 +1,7 @@
 import { Contract, ethers, Event } from "ethers";
 import { Dex } from "../Dex";
-import { swapEventToCsvRow } from "../../helpers/events";
-import { SwapEventCallback, SwapRecord } from "../types";
+import { mintEventToCsvRow, swapEventToCsvRow } from "../../helpers/events";
+import { MintRecord, SwapEventCallback, SwapRecord } from "../types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export abstract class UniswapV2Clone extends Dex {
@@ -16,7 +16,7 @@ export abstract class UniswapV2Clone extends Dex {
    */
   getRouter(): Contract {
     return new ethers.Contract(
-      this.routerAddress,
+      this.routerAddress.toLowerCase(),
       this.routerAbi,
       this.provider
     );
@@ -27,7 +27,7 @@ export abstract class UniswapV2Clone extends Dex {
    */
   getFactory(): Contract {
     return new ethers.Contract(
-      this.factoryAddress,
+      this.factoryAddress.toLowerCase(),
       this.factoryAbi,
       this.provider
     );
@@ -37,7 +37,7 @@ export abstract class UniswapV2Clone extends Dex {
    * Return the contract of a specific LP pair
    */
   getPair(pair: string): Contract {
-    return new ethers.Contract(pair, this.pairAbi, this.provider);
+    return new ethers.Contract(pair.toLowerCase(), this.pairAbi, this.provider);
   }
 
   /**
@@ -50,7 +50,7 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
-   * Return the list of swap events for the given pair.
+   * Return the list of Swap events for the given pair.
    *
    * Docs: https://docs.ethers.io/v5/getting-started/#getting-started--history
    */
@@ -65,15 +65,57 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
-   * Return a table with the swap events for the given pair.
+   * Return a table with the Swap events for the given pair.
    */
-  async getSwapHistoryTable(
+  async getSwapHistoryTable({
+    pair,
+    fromBlock,
+    toBlock,
+    digits0,
+    digits1,
+  }: {
+    pair: string;
+    fromBlock?: number;
+    toBlock?: number;
+    digits0?: number;
+    digits1?: number;
+  }): Promise<SwapRecord[]> {
+    const swapHistory = await this.getSwapHistory(pair, fromBlock, toBlock);
+    return swapHistory.map((s) => swapEventToCsvRow(s, digits0, digits1));
+  }
+
+  /**
+   * Return the list of Mint events (liquidity add) for the given
+   * pair.
+   */
+  async getMintHistory(
     pair: string,
     fromBlock?: number,
     toBlock?: number
-  ): Promise<SwapRecord[]> {
-    const swapHistory = await this.getSwapHistory(pair, fromBlock, toBlock);
-    return swapHistory.map(swapEventToCsvRow);
+  ): Promise<Event[]> {
+    const pool = this.getPair(pair);
+    const filter = pool.filters.Mint();
+    return await pool.queryFilter(filter, fromBlock, toBlock);
+  }
+
+  /**
+   * Return a table with the Mint events for the given pair.
+   */
+  async getMintHistoryTable({
+    pair,
+    fromBlock,
+    toBlock,
+    digits0,
+    digits1,
+  }: {
+    pair: string;
+    fromBlock?: number;
+    toBlock?: number;
+    digits0?: number;
+    digits1?: number;
+  }): Promise<MintRecord[]> {
+    const mintHistory = await this.getMintHistory(pair, fromBlock, toBlock);
+    return mintHistory.map((s) => mintEventToCsvRow(s, digits0, digits1));
   }
 
   /**
@@ -87,7 +129,12 @@ export abstract class UniswapV2Clone extends Dex {
     token1: string
   ): Promise<TransactionReceipt> {
     const factory = this.getFactory();
-    const filter = factory.filters.PairCreated(token0, token1, null, null);
+    const filter = factory.filters.PairCreated(
+      token0.toLowerCase(),
+      token1.toLowerCase(),
+      null,
+      null
+    );
     const events = await factory.queryFilter(filter);
     if (events.length === 0) {
       throw new Error(

@@ -5,8 +5,8 @@ import { getWebsocketProvider } from "../../src/helpers/providers";
 import ObjectsToCsv from "objects-to-csv";
 
 task(
-  "uniswapV2Clone:getFirstSwaps",
-  "Get the first ever swaps for the given pair"
+  "uniswapV2Clone:getFirstMints",
+  "Get the first Mint events (liquidity add) for the given pair"
 )
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
   .addPositionalParam("pair", "Address of the pair to analyze")
@@ -31,7 +31,7 @@ task(
       console.log(`>>> PAIR CREATED ON BLOCK ${creationTx.blockNumber}`);
       const fromBlock = creationTx.blockNumber;
       const toBlock = fromBlock + nblocks;
-      const swaps = await dex.getSwapHistoryTable({
+      const mints = await dex.getMintHistoryTable({
         pair,
         fromBlock,
         toBlock,
@@ -39,10 +39,10 @@ task(
         digits1,
       });
       if (!csv) {
-        console.log(swaps);
+        console.log(mints);
         return;
       }
-      const csvFile = new ObjectsToCsv(swaps);
+      const csvFile = new ObjectsToCsv(mints);
       await csvFile.toDisk(csv);
       console.log(`Output saved to file ${csv}`);
     }
