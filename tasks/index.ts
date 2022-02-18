@@ -3,7 +3,7 @@
  * throught the Hardhat CLI
  */
 
-// General purposes tasks
+// Tasks working for any DEX
 import "./uniswapV2Clones/getRecentSwaps";
 import "./uniswapV2Clones/getRecentPairCreations";
 import "./uniswapV2Clones/getPairCreationTx";
@@ -23,3 +23,7 @@ import "./uniswapV3/listenToPoolCreated";
 import "./traderJoe/listenToSwap";
 import "./traderJoe/listenToSwapStandalone";
 import "./traderJoe/getRecentSwaps";
+
+// Utilities
+import "./utils/getBlockTime";
+import "./utils/getLatestBlock";
