@@ -53,6 +53,9 @@ export function getWebsocketUrl(network: string): string {
     case "avalanche":
       url = getenv("AVALANCHE_WS_URL");
       break;
+    case "cronos":
+      url = getenv("CRONOS_WS_URL");
+      break;
     default:
       throw new Error(`Network ${network} not recognized`);
   }

@@ -23,6 +23,12 @@ const config: HardhatUserConfig = {
         ? [getenv("ETHEREUM_PRIVATE_KEY")]
         : [],
     },
+    cronos: {
+      url: getenv("CRONOS_URL"),
+      accounts: getenv("CRONOS_PRIVATE_KEY")
+        ? [getenv("CRONOS_PRIVATE_KEY")]
+        : [],
+    },
   },
 };
 

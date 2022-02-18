@@ -1,5 +1,6 @@
 import { UniswapV2 } from "./UniswapV2";
 import { TraderJoe } from "./TraderJoe";
+import { MadMeerkat } from "./MadMeerkat";
 import { UniswapV2Clone } from "./UniswapV2Clone";
 import { Provider } from "@ethersproject/abstract-provider";
 import { DexFactory } from "../DexFactory";
@@ -17,6 +18,9 @@ export class UniswapV2CloneFactory extends DexFactory {
         break;
       case "TraderJoe":
         dex = new TraderJoe(provider);
+        break;
+      case "MadMeerkat":
+        dex = new MadMeerkat(provider);
         break;
       default:
         throw new Error(`DEX ${dexName} not supported`);
