@@ -46,15 +46,16 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
+* Provide easy way to input addresses from CLI (preload tickers in ENV?)
 * Use Hardhat typechain mechanism to automatically generate types for event args
-* Script to track first N swaps for the given pair
-* Listen to pair creation method in DEX class
-* Listen to add liquidity in DEX class
-* Task to listen to add liquidity
+* Provide examples on how to run tasks
 * In order to snipe should we listen to add liquidity or pair creation?
 
 # Done
 
+* Listen to add and remove liquidity (mint and burn) in DEX class
+* Listen to pair creation method in DEX class
+* Script to track first N swaps for the given pair
 * DEX classes: UniswapV2 and TraderJoe
 * Listen to Trader Joe's pair creations
 * Sort out .env

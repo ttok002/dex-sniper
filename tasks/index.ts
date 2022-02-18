@@ -9,6 +9,10 @@ import "./uniswapV2Clones/getRecentPairCreations";
 import "./uniswapV2Clones/getPairCreationTx";
 import "./uniswapV2Clones/getFirstSwaps";
 import "./uniswapV2Clones/getFirstMints";
+import "./uniswapV2Clones/getRecentMints";
+import "./uniswapV2Clones/listenToSwaps";
+import "./uniswapV2Clones/listenToMints";
+import "./uniswapV2Clones/listenToBurns";
 
 // DEX-specific tasks
 import "./uniswapV2/listenToPairCreated";

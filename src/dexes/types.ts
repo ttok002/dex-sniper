@@ -2,7 +2,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 /**
- * The callback to a Swap event
+ * The callback of a Swap event on the pair
  */
 export interface SwapEventCallback {
   (
@@ -17,7 +17,33 @@ export interface SwapEventCallback {
 }
 
 /**
- * TODO: How can we use SwapEvent in SwapEventCallback?
+ * The callback of a Mint event on the pair
+ */
+export interface MintEventCallback {
+  (
+    sender: string,
+    amount0: BigNumber,
+    amount1: BigNumber,
+    tx: TransactionReceipt
+  ): void;
+}
+
+/**
+ * The callback of a Burn event on the pair
+ */
+export interface BurnEventCallback {
+  (
+    sender: string,
+    amount0: BigNumber,
+    amount1: BigNumber,
+    to: string,
+    tx: TransactionReceipt
+  ): void;
+}
+
+/**
+ * TODO: How can we use SwapEvent in SwapEventCallback,
+ * to reduce boilerplate?
  */
 export interface SwapEvent {
   sender: string;

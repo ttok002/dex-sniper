@@ -17,6 +17,7 @@ export const PAIRS_UNISWAPV2: Record<string, Pair> = {
   USDC_WETH: {
     label: "USDC-WETH",
     address: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
+    creationBlock: 10008355,
     token0: ERC20.USDC,
     token1: ERC20.WETH,
   },

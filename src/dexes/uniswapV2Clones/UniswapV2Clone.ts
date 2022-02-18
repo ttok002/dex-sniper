@@ -1,7 +1,13 @@
 import { Contract, ethers, Event } from "ethers";
 import { Dex } from "../Dex";
 import { mintEventToCsvRow, swapEventToCsvRow } from "../../helpers/events";
-import { MintRecord, SwapEventCallback, SwapRecord } from "../types";
+import {
+  BurnEventCallback,
+  MintEventCallback,
+  MintRecord,
+  SwapEventCallback,
+  SwapRecord,
+} from "../types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
 export abstract class UniswapV2Clone extends Dex {
@@ -41,12 +47,30 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
-   * Fire the given callback everytime a swap is made
+   * Fire the given callback everytime a Swap is made
    * on the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
     const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
     pool.on("Swap", callback);
+  }
+
+  /**
+   * Fire the given callback everytime a Mint (add liquidity)
+   * is made on the given pair
+   */
+  listenToMint(pair: string, callback: MintEventCallback): void {
+    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
+    pool.on("Mint", callback);
+  }
+
+  /**
+   * Fire the given callback everytime a Burn (remove liquidity)
+   * is made on the given pair
+   */
+  listenToBurn(pair: string, callback: BurnEventCallback): void {
+    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
+    pool.on("Burn", callback);
   }
 
   /**
