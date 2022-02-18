@@ -4,7 +4,7 @@
 
 import { task } from "hardhat/config";
 import { wait } from "../../src/helpers/general";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 
 task("traderJoe:listenToSwapStandalone", "Listen to swaps on Trader Joe.")
   .addOptionalPositionalParam(
@@ -20,7 +20,7 @@ task("traderJoe:listenToSwapStandalone", "Listen to swaps on Trader Joe.")
     };
 
     // ACCOUNT
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
 
     // CONTRACTS
     const pool = new ethers.Contract(

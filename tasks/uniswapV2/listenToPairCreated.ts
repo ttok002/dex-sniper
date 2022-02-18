@@ -9,7 +9,7 @@
 
 import { task } from "hardhat/config";
 import { wait } from "../../src/helpers/general";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 
 task(
   "uniswapV2:listenToPairCreated",
@@ -22,7 +22,7 @@ task(
   };
 
   // ACCOUNT
-  const provider = getWebsocketProvider(hre);
+  const provider = getProvider(hre);
 
   // CONTRACTS
   const factory = new ethers.Contract(

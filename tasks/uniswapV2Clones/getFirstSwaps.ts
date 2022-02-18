@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
 
@@ -21,7 +21,7 @@ task(
       { dexName, pair, token0, token1, nblocks, csv, digits0, digits1 },
       hre
     ) => {
-      const provider = getWebsocketProvider(hre);
+      const provider = getProvider(hre);
       const dex = new UniswapV2CloneFactory().create(
         dexName,
         provider,

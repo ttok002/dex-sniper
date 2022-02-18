@@ -28,6 +28,7 @@ const config: HardhatUserConfig = {
       accounts: getenv("CRONOS_PRIVATE_KEY")
         ? [getenv("CRONOS_PRIVATE_KEY")]
         : [],
+      chainId: 25,
     },
   },
 };

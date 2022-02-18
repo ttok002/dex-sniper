@@ -42,6 +42,13 @@ export interface BurnEventCallback {
 }
 
 /**
+ * The callback of a PairCreated event on the factory
+ */
+export interface PairCreatedEventCallback {
+  (token0: string, token1: string, pair: string, tx: TransactionReceipt): void;
+}
+
+/**
  * TODO: How can we use SwapEvent in SwapEventCallback,
  * to reduce boilerplate?
  */

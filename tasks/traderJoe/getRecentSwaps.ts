@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { TraderJoe } from "../../src/dexes/uniswapV2Clones/TraderJoe";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
@@ -17,7 +17,7 @@ task(
   .addOptionalParam("n", "Number of blocks to get", 1, types.int)
   .addOptionalParam("csv", "Dump table to given file in CSV format")
   .setAction(async ({ pair, n, csv }, hre) => {
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
     const dex = new TraderJoe(provider);
     const [fromBlock, toBlock] = await getMostRecentBlocksRange(n, provider);
     const swaps = await dex.getSwapHistoryTable({ pair, fromBlock, toBlock });

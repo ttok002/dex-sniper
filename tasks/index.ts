@@ -13,6 +13,7 @@ import "./uniswapV2Clones/getRecentMints";
 import "./uniswapV2Clones/listenToSwaps";
 import "./uniswapV2Clones/listenToMints";
 import "./uniswapV2Clones/listenToBurns";
+import "./uniswapV2Clones/listenToPairCreated";
 
 // DEX-specific tasks
 import "./uniswapV2/listenToPairCreated";

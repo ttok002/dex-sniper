@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
@@ -13,7 +13,7 @@ task(
   .addOptionalParam("nblocks", "Number of blocks to get", 10, types.int)
   .addOptionalParam("csv", "Dump table to given file in CSV format")
   .setAction(async ({ dexName, nblocks, csv }, hre) => {
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
     const dex = new UniswapV2CloneFactory().create(
       dexName,
       provider,

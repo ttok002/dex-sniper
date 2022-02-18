@@ -1,6 +1,6 @@
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
@@ -13,7 +13,7 @@ task("uniswapV2Clone:getRecentSwaps", "Get recent swaps for the given pair")
   .addOptionalParam("digits0", "1st token digits", 18, types.int)
   .addOptionalParam("digits1", "2nd token digits", 18, types.int)
   .setAction(async ({ dexName, pair, nblocks, csv, digits0, digits1 }, hre) => {
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
     const dex = new UniswapV2CloneFactory().create(
       dexName,
       provider,

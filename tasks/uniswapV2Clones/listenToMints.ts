@@ -1,7 +1,7 @@
 import { task } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { wait } from "../../src/helpers/general";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 
 task(
   "uniswapV2Clone:listenToMints",
@@ -10,7 +10,7 @@ task(
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
   .addPositionalParam("pair", "Pair to spy")
   .setAction(async ({ dexName, pair }, hre) => {
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
     const dex = new UniswapV2CloneFactory().create(
       dexName,
       provider,

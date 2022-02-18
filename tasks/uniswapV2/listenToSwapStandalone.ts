@@ -3,7 +3,7 @@
  */
 
 import { task } from "hardhat/config";
-import { getWebsocketProvider } from "../../src/helpers/providers";
+import { getProvider } from "../../src/helpers/providers";
 import { wait } from "../../src/helpers/general";
 
 task("uniswapV2:listenToSwapStandalone", "Listen to swaps on Uniswap.")
@@ -20,7 +20,7 @@ task("uniswapV2:listenToSwapStandalone", "Listen to swaps on Uniswap.")
     };
 
     // ACCOUNT
-    const provider = getWebsocketProvider(hre);
+    const provider = getProvider(hre);
 
     // CONTRACTS
     const pool = new ethers.Contract(

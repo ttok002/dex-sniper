@@ -1,66 +1,22 @@
-import { WebSocketProvider } from "@ethersproject/providers/src.ts/index";
+import { Provider } from "@ethersproject/providers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { JsonRpcProvider } from "@ethersproject/providers";
-import { getenv } from "../common/dotenv";
+import { URL } from "url";
 
 /**
- * Return an HTTP provider given the HRE.
+ * Return either an HTTP Provider or a WebSocket provider
+ * depending on the network URL given to Hardhat.
  */
-export function getHttpProvider(
-  hre: HardhatRuntimeEnvironment
-): JsonRpcProvider {
+export function getProvider(hre: HardhatRuntimeEnvironment): Provider {
   // @ts-ignore
-  const url = hre.network.config.url;
-  return new hre.ethers.providers.JsonRpcProvider(url);
-}
-
-/**
- * Return a Websocket provider given the HRE; the Websocket
- * URL needs to be configured in .env.
- *
- * This function is needed until Hardhat implements the
- * feature natively (see https://github.com/nomiclabs/hardhat/issues/2391)
- */
-export function getWebsocketProvider(
-  hre: HardhatRuntimeEnvironment
-): WebSocketProvider {
-  // @ts-ignore
-  const url = getWebsocketUrl(hre.network.name);
-  return new hre.ethers.providers.WebSocketProvider(url);
-}
-
-/**
- * Return the first signer for the given network
- */
-export function getWebsocketSigner(hre: HardhatRuntimeEnvironment) {
-  // @ts-ignore
-  const account = hre.network.config.accounts[0];
-  const wallet = new hre.ethers.Wallet(account);
-  const provider = getWebsocketProvider(hre);
-  return wallet.connect(provider);
-}
-
-/**
- * Return the Websocket node URL for the given network, as
- * specified in .env
- */
-export function getWebsocketUrl(network: string): string {
-  let url: string;
-  switch (network) {
-    case "ethereum":
-      url = getenv("ETHEREUM_WS_URL");
-      break;
-    case "avalanche":
-      url = getenv("AVALANCHE_WS_URL");
-      break;
-    case "cronos":
-      url = getenv("CRONOS_WS_URL");
-      break;
+  const url = new URL(hre.network.config.url);
+  console.log(`Node: ${url}`);
+  switch (url.protocol) {
+    case "http:":
+    case "https:":
+      return new hre.ethers.providers.JsonRpcProvider(url.href);
+    case "wss:":
+      return new hre.ethers.providers.WebSocketProvider(url.href);
     default:
-      throw new Error(`Network ${network} not recognized`);
+      throw new Error(`Network URL is not correct, check .env > '${url.href}'`);
   }
-  if (!url) {
-    throw new Error(`Missing Websocket URL for network '${network}'`);
-  }
-  return url;
 }

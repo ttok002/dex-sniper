@@ -5,6 +5,7 @@ import {
   BurnEventCallback,
   MintEventCallback,
   MintRecord,
+  PairCreatedEventCallback,
   SwapEventCallback,
   SwapRecord,
 } from "../types";
@@ -51,8 +52,7 @@ export abstract class UniswapV2Clone extends Dex {
    * on the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
-    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
-    pool.on("Swap", callback);
+    this.getPair(pair).on("Swap", callback);
   }
 
   /**
@@ -60,8 +60,7 @@ export abstract class UniswapV2Clone extends Dex {
    * is made on the given pair
    */
   listenToMint(pair: string, callback: MintEventCallback): void {
-    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
-    pool.on("Mint", callback);
+    this.getPair(pair).on("Mint", callback);
   }
 
   /**
@@ -69,8 +68,15 @@ export abstract class UniswapV2Clone extends Dex {
    * is made on the given pair
    */
   listenToBurn(pair: string, callback: BurnEventCallback): void {
-    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
-    pool.on("Burn", callback);
+    this.getPair(pair).on("Burn", callback);
+  }
+
+  /**
+   * Fire the given callback everytime a new pair is
+   * created
+   */
+  listenToPairCreated(callback: PairCreatedEventCallback): void {
+    this.getFactory().on("PairCreated", callback);
   }
 
   /**
