@@ -17,6 +17,6 @@ export function getProvider(hre: HardhatRuntimeEnvironment): Provider {
     case "wss:":
       return new hre.ethers.providers.WebSocketProvider(url.href);
     default:
-      throw new Error(`Network URL is not correct, check .env > '${url.href}'`);
+      throw new Error(`Network URL not valid: '${url.href}'`);
   }
 }
