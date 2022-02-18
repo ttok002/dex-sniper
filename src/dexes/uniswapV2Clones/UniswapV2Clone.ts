@@ -18,7 +18,7 @@ export abstract class UniswapV2Clone extends Dex {
     return new ethers.Contract(
       this.routerAddress,
       this.routerAbi,
-      this.signerOrProvider
+      this.provider
     );
   }
 
@@ -29,7 +29,7 @@ export abstract class UniswapV2Clone extends Dex {
     return new ethers.Contract(
       this.factoryAddress,
       this.factoryAbi,
-      this.signerOrProvider
+      this.provider
     );
   }
 
@@ -37,7 +37,7 @@ export abstract class UniswapV2Clone extends Dex {
    * Return the contract of a specific LP pair
    */
   getPair(pair: string): Contract {
-    return new ethers.Contract(pair, this.pairAbi, this.signerOrProvider);
+    return new ethers.Contract(pair, this.pairAbi, this.provider);
   }
 
   /**
@@ -45,7 +45,7 @@ export abstract class UniswapV2Clone extends Dex {
    * on the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
-    const pool = new ethers.Contract(pair, this.pairAbi, this.signerOrProvider);
+    const pool = new ethers.Contract(pair, this.pairAbi, this.provider);
     pool.on("Swap", callback);
   }
 

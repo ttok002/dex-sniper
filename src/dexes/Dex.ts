@@ -1,4 +1,3 @@
-import { Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
 /**
@@ -7,10 +6,10 @@ import { Provider } from "@ethersproject/providers";
  */
 export abstract class Dex {
   /**
-   * The DEX object contains the provider (if it just needs
-   * to read) or the signer (if it also needs to write)
+   * The DEX object must contains the provider used to
+   * read the contracts
    */
-  signerOrProvider?: Signer | Provider;
+  provider?: Provider;
 
   /**
    * List of networks supported by the DEX (ethereum,
@@ -18,8 +17,8 @@ export abstract class Dex {
    */
   abstract supportedNetworks: string[];
 
-  constructor(signerOrProvider?: Signer | Provider) {
-    this.signerOrProvider = signerOrProvider;
+  constructor(provider?: Provider) {
+    this.provider = provider;
   }
 
   /**
