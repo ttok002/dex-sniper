@@ -11,3 +11,4 @@ artifacts
 # Other
 *.csv
 command_history
+.DS_Store
