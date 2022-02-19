@@ -13,7 +13,7 @@ blockFirstMint="9780566"
 outputDir="output/Avalanche/TraderJoe/WAVAX-HEC"
 
 # getSwaps
-hh uniswapV2Clone:getSwaps ${dex} ${pair} --fromblock ${blockFirstSwap} --nblocks "${nBlocks}" --network ${network} --csv ${outputDir}/swaps-first-${nBlocks}_blocks.csv
+hh uniswapV2Clone:getSwaps ${dex} ${pair} --fromblock ${blockFirstSwap} --nblocks "${nBlocks}" --network ${network} --csv "${outputDir}/swaps-first-${nBlocks}_blocks.csv"
 
 # getMints
-hh uniswapV2Clone:getMints ${dex} ${pair} --fromblock ${blockFirstMint} --nblocks "${nBlocks}" --network ${network} --csv ${outputDir}/mints-first-${nBlocks}_blocks.csv
+hh uniswapV2Clone:getMints ${dex} ${pair} --fromblock ${blockFirstMint} --nblocks "${nBlocks}" --network ${network} --csv "${outputDir}/mints-first-${nBlocks}_blocks.csv"

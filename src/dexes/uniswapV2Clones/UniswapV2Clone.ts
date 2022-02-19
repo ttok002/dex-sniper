@@ -1,13 +1,14 @@
 import { Contract, ethers, Event } from "ethers";
 import { Dex } from "../Dex";
-import { mintEventToCsvRow, swapEventToCsvRow } from "../../helpers/events";
+import { mintEventToCsvRow } from "../../helpers/mints";
+import { swapEventToCsvRow } from "../../helpers/swaps";
 import {
   BurnEventCallback,
   MintEventCallback,
-  MintRecord,
+  MintRecordRaw,
   PairCreatedEventCallback,
   SwapEventCallback,
-  SwapRecord,
+  SwapRecordRaw,
 } from "../types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
@@ -109,7 +110,7 @@ export abstract class UniswapV2Clone extends Dex {
     toBlock?: number;
     digits0?: number;
     digits1?: number;
-  }): Promise<SwapRecord[]> {
+  }): Promise<SwapRecordRaw[]> {
     const swapHistory = await this.getSwapHistory(pair, fromBlock, toBlock);
     return swapHistory.map((s) => swapEventToCsvRow(s, digits0, digits1));
   }
@@ -143,7 +144,7 @@ export abstract class UniswapV2Clone extends Dex {
     toBlock?: number;
     digits0?: number;
     digits1?: number;
-  }): Promise<MintRecord[]> {
+  }): Promise<MintRecordRaw[]> {
     const mintHistory = await this.getMintHistory(pair, fromBlock, toBlock);
     return mintHistory.map((s) => mintEventToCsvRow(s, digits0, digits1));
   }

@@ -1,5 +1,5 @@
 import { ethers, Event } from "ethers";
-import { MintRecord, SwapRecord } from "../dexes/types";
+import { SwapRecordRaw } from "../dexes/types";
 
 /**
  * Convert a Swap event to a flat object suitable to
@@ -9,7 +9,7 @@ export function swapEventToCsvRow(
   event: Event,
   digits0: number = 18,
   digits1: number = 18
-): SwapRecord {
+): SwapRecordRaw {
   return {
     blockNumber: event.blockNumber,
     // @ts-ignore
@@ -39,34 +39,6 @@ export function swapEventToCsvRow(
     ),
     // @ts-ignore
     to: event.args.to,
-    tx: event.transactionHash,
-  };
-}
-
-/**
- * Convert a Mint event to a flat object suitable to
- * be printed as a CSV row
- */
-export function mintEventToCsvRow(
-  event: Event,
-  digits0: number = 18,
-  digits1: number = 18
-): MintRecord {
-  return {
-    blockNumber: event.blockNumber,
-    // @ts-ignore
-    sender: event.args.sender.toString(),
-    amount0: ethers.utils.formatUnits(
-      // @ts-ignore
-      event.args.amount0,
-      digits0
-    ),
-    // @ts-ignore
-    amount1: ethers.utils.formatUnits(
-      // @ts-ignore
-      event.args.amount1,
-      digits1
-    ),
     tx: event.transactionHash,
   };
 }

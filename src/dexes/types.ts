@@ -63,9 +63,9 @@ export interface SwapEvent {
 }
 
 /**
- * Info concerning a swap on a DEX pair
+ * Basic info concerning a swap event
  */
-export interface SwapRecord {
+export interface SwapRecordRaw {
   blockNumber: number;
   sender: string;
   amount0In: string;
@@ -77,9 +77,21 @@ export interface SwapRecord {
 }
 
 /**
- * Info concerning a mint on a DEX pair
+ * Data concerning a swap suitable for
+ * statistical analysis
  */
-export interface MintRecord {
+export interface SwapRecordStat {
+  "Block number": number;
+  Date: string;
+  Address: string;
+  "Amount swapped": number;
+  Price: number;
+}
+
+/**
+ * Basic Info concerning a mint event
+ */
+export interface MintRecordRaw {
   blockNumber: number;
   sender: string;
   amount0: string;
