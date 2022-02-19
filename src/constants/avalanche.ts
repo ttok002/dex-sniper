@@ -28,8 +28,10 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
   WAVAX_HEC: {
     label: "WAVAX-HEC",
     address: "0x4dc5291cdc7ad03342994e35d0ccc76de065a566",
-    creationBlock: 9663491,
     token1: ERC20.WAVAX,
     token0: ERC20.HEC,
+    creationBlock: 9663491,
+    firstSwapBlock: 9780566,
+    firstMintBlock: 9780566,
   },
 };

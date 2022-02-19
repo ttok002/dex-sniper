@@ -3,7 +3,7 @@ import { getProvider } from "../../src/helpers/providers";
 import moment from "moment";
 
 task(
-  "utils:getBlockTime",
+  "utils:getTimeFromBlock",
   "Given a block number, return its timestamp and its time"
 )
   .addPositionalParam(

@@ -5,20 +5,28 @@ import { getProvider } from "../../src/helpers/providers";
 import ObjectsToCsv from "objects-to-csv";
 
 task(
-  "uniswapV2Clone:getFirstMints",
-  "Get the first Mint events (liquidity add) for the given pair"
+  "uniswapV2Clone:getSwaps",
+  "Get swaps for the given pair after a certain block"
 )
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
   .addPositionalParam("pair", "Address of the pair to analyze")
-  .addPositionalParam("token0", "Address of the first token in the pair")
-  .addPositionalParam("token1", "Address of the second token in the pair")
-  .addOptionalParam("nblocks", "Number of blocks to get", 10, types.int)
+  .addParam(
+    "fromblock",
+    "Block number from which to start",
+    undefined,
+    types.int
+  )
+  .addOptionalParam(
+    "nblocks",
+    "Number of blocks to get, you can use negative values to find earlier blocks",
+    "10"
+  )
   .addOptionalParam("csv", "Optionally dump table to this file as CSV")
   .addOptionalParam("digits0", "1st token digits", 18, types.int)
   .addOptionalParam("digits1", "2nd token digits", 18, types.int)
   .setAction(
     async (
-      { dexName, pair, token0, token1, nblocks, csv, digits0, digits1 },
+      { dexName, pair, fromblock, nblocks, csv, digits0, digits1 },
       hre
     ) => {
       const provider = getProvider(hre);
@@ -27,11 +35,11 @@ task(
         provider,
         hre.network.name
       );
-      const creationTx = await dex.getPairCreationTx(token0, token1);
-      console.log(`>>> PAIR CREATED ON BLOCK ${creationTx.blockNumber}`);
-      const fromBlock = creationTx.blockNumber;
-      const toBlock = fromBlock + nblocks;
-      const mints = await dex.getMintHistoryTable({
+      const fromBlock = Math.min(fromblock, fromblock + parseInt(nblocks, 10));
+      const toBlock = Math.max(fromblock, fromblock + parseInt(nblocks, 10));
+      console.log(`fromBlock: ${fromBlock}`);
+      console.log(`toBlock:   ${toBlock}`);
+      const swaps = await dex.getSwapHistoryTable({
         pair,
         fromBlock,
         toBlock,
@@ -39,10 +47,10 @@ task(
         digits1,
       });
       if (!csv) {
-        console.log(mints);
+        console.log(swaps);
         return;
       }
-      const csvFile = new ObjectsToCsv(mints);
+      const csvFile = new ObjectsToCsv(swaps);
       await csvFile.toDisk(csv);
       console.log(`Output saved to file ${csv}`);
     }

@@ -7,7 +7,9 @@ export interface Token {
 export interface Pair {
   label: string;
   address: string;
-  creationBlock?: number;
   token0: Token;
   token1: Token;
+  creationBlock?: number;
+  firstSwapBlock?: number;
+  firstMintBlock?: number;
 }
