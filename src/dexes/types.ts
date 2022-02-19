@@ -81,11 +81,14 @@ export interface SwapRecordRaw {
  * statistical analysis
  */
 export interface SwapRecordStat {
-  "Block number": number;
-  Date: string;
-  Address: string;
-  "Amount swapped": number;
+  Block: number;
+  AmountIn: string; // +ve = buy, -ve = sell, has to be string
+  AmountOut: string; // +ve = buy, -ve = sell, has to be string
   Price: number;
+  Sender: string;
+  To: string;
+  Transaction: string;
+  "Block Diff"?: number;
 }
 
 /**

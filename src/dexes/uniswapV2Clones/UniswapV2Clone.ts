@@ -1,14 +1,10 @@
 import { Contract, ethers, Event } from "ethers";
 import { Dex } from "../Dex";
-import { mintEventToCsvRow } from "../../helpers/mints";
-import { swapEventToCsvRow } from "../../helpers/swaps";
 import {
   BurnEventCallback,
   MintEventCallback,
-  MintRecordRaw,
   PairCreatedEventCallback,
   SwapEventCallback,
-  SwapRecordRaw,
 } from "../types";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 
@@ -96,26 +92,6 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
-   * Return a table with the Swap events for the given pair.
-   */
-  async getSwapHistoryTable({
-    pair,
-    fromBlock,
-    toBlock,
-    digits0,
-    digits1,
-  }: {
-    pair: string;
-    fromBlock?: number;
-    toBlock?: number;
-    digits0?: number;
-    digits1?: number;
-  }): Promise<SwapRecordRaw[]> {
-    const swapHistory = await this.getSwapHistory(pair, fromBlock, toBlock);
-    return swapHistory.map((s) => swapEventToCsvRow(s, digits0, digits1));
-  }
-
-  /**
    * Return the list of Mint events (liquidity add) for the given
    * pair.
    */
@@ -127,26 +103,6 @@ export abstract class UniswapV2Clone extends Dex {
     const pool = this.getPair(pair);
     const filter = pool.filters.Mint();
     return await pool.queryFilter(filter, fromBlock, toBlock);
-  }
-
-  /**
-   * Return a table with the Mint events for the given pair.
-   */
-  async getMintHistoryTable({
-    pair,
-    fromBlock,
-    toBlock,
-    digits0,
-    digits1,
-  }: {
-    pair: string;
-    fromBlock?: number;
-    toBlock?: number;
-    digits0?: number;
-    digits1?: number;
-  }): Promise<MintRecordRaw[]> {
-    const mintHistory = await this.getMintHistory(pair, fromBlock, toBlock);
-    return mintHistory.map((s) => mintEventToCsvRow(s, digits0, digits1));
   }
 
   /**

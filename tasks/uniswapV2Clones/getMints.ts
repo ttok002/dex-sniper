@@ -3,6 +3,7 @@ import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2
 import { getProvider } from "../../src/helpers/providers";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
+import { mintEventToCsvRow } from "../../src/helpers/mints";
 
 task(
   "uniswapV2Clone:getMints",
@@ -39,13 +40,10 @@ task(
       const toBlock = Math.max(fromblock, fromblock + parseInt(nblocks, 10));
       console.log(`fromBlock: ${fromBlock}`);
       console.log(`toBlock:   ${toBlock}`);
-      const mints = await dex.getMintHistoryTable({
-        pair,
-        fromBlock,
-        toBlock,
-        digits0,
-        digits1,
-      });
+      const mintsHistory = await dex.getMintHistory(pair, fromBlock, toBlock);
+      const mints = mintsHistory.map((e) =>
+        mintEventToCsvRow(e, digits0, digits1)
+      );
       if (!csv) {
         console.log(mints);
         return;

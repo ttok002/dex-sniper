@@ -16,6 +16,11 @@ export const ERC20: Record<string, Token> = {
     address: "0xc7f4debc8072e23fe9259a5c0398326d8efb7f5c",
     digits: 18,
   },
+  DFIAT: {
+    label: "DFIAT Defiato",
+    address: "0xafe3d2a31231230875dee1fa1eef14a412443d22",
+    digits: 18,
+  },
 };
 
 export const PAIRS_TRADERJOE: Record<string, Pair> = {
@@ -28,10 +33,16 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
   WAVAX_HEC: {
     label: "WAVAX-HEC",
     address: "0x4dc5291cdc7ad03342994e35d0ccc76de065a566",
-    token1: ERC20.WAVAX,
-    token0: ERC20.HEC,
+    token0: ERC20.WAVAX,
+    token1: ERC20.HEC,
     creationBlock: 9663491,
     firstSwapBlock: 9780566,
     firstMintBlock: 9780566,
+  },
+  WAVAX_DFIAT: {
+    label: "WAVAX-DFIAT",
+    address: "0x4dc5291cdc7ad03342994e35d0ccc76de065a566",
+    token0: ERC20.WAVAX,
+    token1: ERC20.DFIAT,
   },
 };

@@ -4,6 +4,7 @@ import { getProvider } from "../../src/helpers/providers";
 import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
+import { mintEventToCsvRow } from "../../src/helpers/mints";
 
 task("uniswapV2Clone:getRecentMints", "Get recent mints for the given pair")
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
@@ -23,13 +24,10 @@ task("uniswapV2Clone:getRecentMints", "Get recent mints for the given pair")
       nblocks,
       provider
     );
-    const mints = await dex.getMintHistoryTable({
-      pair,
-      fromBlock,
-      toBlock,
-      digits0,
-      digits1,
-    });
+    const mintHistory = await dex.getMintHistory(pair, fromBlock, toBlock);
+    const mints = mintHistory.map((e) =>
+      mintEventToCsvRow(e, digits0, digits1)
+    );
     if (!csv) {
       console.log(mints);
       return;

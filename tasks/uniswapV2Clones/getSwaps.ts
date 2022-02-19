@@ -3,6 +3,7 @@ import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2
 import { getProvider } from "../../src/helpers/providers";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
+import { getSwapRecordStat } from "../../src/helpers/swaps";
 
 task(
   "uniswapV2Clone:getSwaps",
@@ -24,9 +25,15 @@ task(
   .addOptionalParam("csv", "Optionally dump table to this file as CSV")
   .addOptionalParam("digits0", "1st token digits", 18, types.int)
   .addOptionalParam("digits1", "2nd token digits", 18, types.int)
+  .addOptionalParam(
+    "maintoken",
+    "Token you are more interested in; it will be shown first (0 or 1)",
+    0,
+    types.int
+  )
   .setAction(
     async (
-      { dexName, pair, fromblock, nblocks, csv, digits0, digits1 },
+      { dexName, pair, fromblock, nblocks, csv, digits0, digits1, maintoken },
       hre
     ) => {
       const provider = getProvider(hre);
@@ -39,13 +46,10 @@ task(
       const toBlock = Math.max(fromblock, fromblock + parseInt(nblocks, 10));
       console.log(`fromBlock: ${fromBlock}`);
       console.log(`toBlock:   ${toBlock}`);
-      const swaps = await dex.getSwapHistoryTable({
-        pair,
-        fromBlock,
-        toBlock,
-        digits0,
-        digits1,
-      });
+      const swapsHistory = await dex.getSwapHistory(pair, fromBlock, toBlock);
+      const swaps = swapsHistory.map((e) =>
+        getSwapRecordStat(e, digits0, digits1, maintoken)
+      );
       if (!csv) {
         console.log(swaps);
         return;
