@@ -43,31 +43,33 @@ export function getSwapRecordStat(
   mainToken: 0 | 1 = 0
 ): SwapRecordStat {
   const e = (event as any).args as SwapEvent;
-  let mainTokenIn,
-    otherTokenOut,
-    mainTokenInFormatted,
-    otherTokenOutFormatted,
-    price;
+  let stats;
   if (mainToken === 0) {
-    mainTokenIn = e.amount0Out.sub(e.amount0In);
-    mainTokenInFormatted = ethers.utils.formatUnits(mainTokenIn, digits0);
-    otherTokenOut = e.amount1Out.sub(e.amount1In);
-    otherTokenOutFormatted = ethers.utils.formatUnits(otherTokenOut, digits1);
-    price = getRelativePrice(mainTokenIn, otherTokenOut, digits0, digits1);
+    stats = getSwapStats(
+      e.amount0In,
+      e.amount0Out,
+      e.amount1In,
+      e.amount1Out,
+      digits0,
+      digits1
+    );
   } else if (mainToken === 1) {
-    mainTokenIn = e.amount1Out.sub(e.amount1In);
-    mainTokenInFormatted = ethers.utils.formatUnits(mainTokenIn, digits1);
-    otherTokenOut = e.amount0Out.sub(e.amount0In);
-    otherTokenOutFormatted = ethers.utils.formatUnits(otherTokenOut, digits0);
-    price = getRelativePrice(mainTokenIn, otherTokenOut, digits1, digits0);
+    stats = getSwapStats(
+      e.amount1In,
+      e.amount1Out,
+      e.amount0In,
+      e.amount0Out,
+      digits1,
+      digits0
+    );
   } else {
     throw new Error(`mainToken must be either 0 or 1, ${mainToken} given`);
   }
   return {
     Block: event.blockNumber,
-    AmountIn: mainTokenInFormatted,
-    AmountOut: otherTokenOutFormatted,
-    Price: price,
+    Amount1: stats.net0Formatted,
+    Amount2: stats.net1Formatted,
+    Price: stats.relativePrice,
     Transaction: event.transactionHash,
     Sender: e.sender,
     To: e.to,
@@ -75,17 +77,41 @@ export function getSwapRecordStat(
 }
 
 /**
- * Given the amounts swapped between two tokens, return a string
- * with the price of token0 relative to token1.
+ * Given the amounts as returned by a Swap event,
+ * return the net flows in the two tokens and the
+ * price of token 0 relative to token 1.
+ */
+export function getSwapStats(
+  amount0In: BigNumber,
+  amount0Out: BigNumber,
+  amount1In: BigNumber,
+  amount1Out: BigNumber,
+  digits0: number,
+  digits1: number
+) {
+  const net0 = amount0Out.sub(amount0In);
+  const net1 = amount1Out.sub(amount1In);
+  return {
+    net0,
+    net1,
+    net0Formatted: ethers.utils.formatUnits(net0, digits0),
+    net1Formatted: ethers.utils.formatUnits(net1, digits1),
+    relativePrice: getRelativePrice(net0, net1, digits0, digits1),
+  };
+}
+
+/**
+ * Given the net amounts swapped in a swap, return the
+ * price of token0 relative to token1.
  */
 export function getRelativePrice(
-  token0: BigNumber,
-  token1: BigNumber,
+  net0: BigNumber,
+  net1: BigNumber,
   digits0: number,
   digits1: number
 ): number {
   return Math.abs(
-    parseFloat(ethers.utils.formatUnits(token1, digits1)) /
-      parseFloat(ethers.utils.formatUnits(token0, digits0))
+    parseFloat(ethers.utils.formatUnits(net1, digits1)) /
+      parseFloat(ethers.utils.formatUnits(net0, digits0))
   );
 }

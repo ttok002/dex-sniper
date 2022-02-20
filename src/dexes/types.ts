@@ -49,6 +49,8 @@ export interface PairCreatedEventCallback {
 }
 
 /**
+ * A Swap event as emitted by a DEX pair.
+ *
  * TODO: How can we use SwapEvent in SwapEventCallback,
  * to reduce boilerplate?
  */
@@ -82,13 +84,23 @@ export interface SwapRecordRaw {
  */
 export interface SwapRecordStat {
   Block: number;
-  AmountIn: string; // +ve = buy, -ve = sell, has to be string
-  AmountOut: string; // +ve = buy, -ve = sell, has to be string
+  Amount1: string; // +ve = buy, -ve = sell, has to be string
+  Amount2: string; // +ve = buy, -ve = sell, has to be string
   Price: number;
   Sender: string;
   To: string;
   Transaction: string;
   "Block Diff"?: number;
+}
+
+/**
+ * A Mint event as emitted by a DEX pair.
+ */
+export interface MintEvent {
+  sender: string;
+  amount0: BigNumber;
+  amount1: BigNumber;
+  tx: TransactionReceipt;
 }
 
 /**
@@ -100,4 +112,18 @@ export interface MintRecordRaw {
   amount0: string;
   amount1: string;
   tx: string;
+}
+
+/**
+ * Data concerning a mint suitable for
+ * statistical analysis
+ */
+export interface MintRecordStat {
+  Block: number;
+  Amount1: string; // +ve = buy, -ve = sell, has to be string
+  Amount2: string; // +ve = buy, -ve = sell, has to be string
+  Price: number;
+  Sender: string;
+  Transaction: string;
+  "Block Diff"?: number;
 }

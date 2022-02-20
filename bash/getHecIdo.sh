@@ -19,4 +19,4 @@ outputDir="output/Avalanche/TraderJoe/WAVAX-HEC"
 hh uniswapV2Clone:getSwaps ${dex} ${pair} --fromblock ${blockFirstSwap} --nblocks "${nBlocks}" --network ${network} --maintoken $mainToken --csv "${outputDir}/swaps-first-${nBlocks}_blocks.csv"
 
 # getMints
-hh uniswapV2Clone:getMints ${dex} ${pair} --fromblock ${blockFirstMint} --nblocks "${nBlocks}" --network ${network} --csv "${outputDir}/mints-first-${nBlocks}_blocks.csv"
+hh uniswapV2Clone:getMints ${dex} ${pair} --fromblock ${blockFirstMint} --nblocks "${nBlocks}" --network ${network} --maintoken $mainToken --csv "${outputDir}/mints-first-${nBlocks}_blocks.csv"

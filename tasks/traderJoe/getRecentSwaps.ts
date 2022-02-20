@@ -4,6 +4,7 @@ import { getProvider } from "../../src/helpers/providers";
 import { getMostRecentBlocksRange } from "../../src/helpers/blocks";
 // @ts-ignore
 import ObjectsToCsv from "objects-to-csv";
+import { getSwapRecordStat } from "../../src/helpers/swaps";
 
 task(
   "traderJoe:getRecentSwaps",
@@ -20,7 +21,8 @@ task(
     const provider = getProvider(hre);
     const dex = new TraderJoe(provider);
     const [fromBlock, toBlock] = await getMostRecentBlocksRange(n, provider);
-    const swaps = await dex.getSwapHistoryTable({ pair, fromBlock, toBlock });
+    const swapHistory = await dex.getSwapHistory(pair, fromBlock, toBlock);
+    const swaps = swapHistory.map((e) => getSwapRecordStat(e));
     if (!csv) {
       console.log(swaps);
       return;
