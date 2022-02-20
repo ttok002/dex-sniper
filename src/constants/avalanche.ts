@@ -21,6 +21,11 @@ export const ERC20: Record<string, Token> = {
     address: "0xafe3d2a31231230875dee1fa1eef14a412443d22",
     digits: 18,
   },
+  ISA: {
+    label: "ISA",
+    address: "0x3EeFb18003D033661f84e48360eBeCD181A84709",
+    digits: 18,
+  },
 };
 
 export const PAIRS_TRADERJOE: Record<string, Pair> = {
@@ -44,5 +49,12 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
     address: "0x4dc5291cdc7ad03342994e35d0ccc76de065a566",
     token0: ERC20.WAVAX,
     token1: ERC20.DFIAT,
+  },
+  ISA_WAVAX: {
+    label: "ISA-WAVAX",
+    address: "0x9155f441ffdfa81b13e385bfac6b3825c05184ee",
+    token0: ERC20.ISA,
+    token1: ERC20.WAVAX,
+    creationBlock: 9228111,
   },
 };
