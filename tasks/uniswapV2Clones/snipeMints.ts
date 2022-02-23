@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { wait } from "../../src/helpers/general";
@@ -25,6 +25,12 @@ task(
     types.float
   )
   .addParam(
+    "minamountout",
+    "Minimum amout of tokens you will receive",
+    undefined,
+    types.float
+  )
+  .addParam(
     "slippage",
     "% you are willing to pay more compared to the price at them moment of the liquidity add",
     undefined,
@@ -41,6 +47,7 @@ task(
         digits1,
         itokenin,
         amountin,
+        minamountout,
         slippage,
       },
       hre
@@ -56,29 +63,48 @@ task(
         digits1: ${digits1}
         itokenin: ${itokenin}
         amountin: ${amountin}
+        minamountout: ${minamountout}
         slippage: ${slippage}
       `);
       // Determine which token we are selling and which we are buying
-      let tokenIn: string, tokenOut: string;
+      let tokenIn: string,
+        tokenOut: string,
+        digitsIn: number,
+        digitsOut: number;
       switch (itokenin) {
         case 0:
           tokenIn = token0;
           tokenOut = token1;
+          digitsIn = digits0;
+          digitsOut = digits1;
           break;
         case 1:
           tokenIn = token1;
           tokenOut = token0;
+          digitsIn = digits1;
+          digitsOut = digits0;
           break;
         default:
           throw new Error(
             `Parameter itokenin must be either 0 or 1, given '${itokenin}'`
           );
       }
+      // Get the amounts in blockchhain format
+      const amountInBigNumber = ethers.utils.parseUnits(
+        amountin + "",
+        digitsIn
+      );
+      const minAmountOutBigNumber = ethers.utils.parseUnits(
+        minamountout + "",
+        digitsOut
+      );
       console.log(`
         Derived values
         =================
         tokenIn: ${tokenIn}
         tokenOut: ${tokenOut}
+        amountInBigNumber: ${amountInBigNumber}
+        minAmountOutBigNumber: ${minAmountOutBigNumber}
       `);
       // Load credentials and get dex object
       const provider = getProvider(hre);
@@ -105,9 +131,39 @@ task(
             digits0,
             digits1
           );
-          // const router = dex.getRouter();
-          // const price = getRelativePrice()
+          // Compute price and minimum amount of tokenOut
+          let price: number;
+          switch (itokenin) {
+            case 0:
+              price = getRelativePrice(
+                mintAmount1,
+                mintAmount0,
+                digits1,
+                digits0
+              );
+              break;
+            case 1:
+              price = getRelativePrice(
+                mintAmount0,
+                mintAmount1,
+                digits0,
+                digits1
+              );
+              break;
+            default:
+              throw new Error(
+                `Parameter itokenin must be either 0 or 1, given '${itokenin}'`
+              );
+          }
+          console.log(`
+            Price of token${itokenin}
+            ==================
+            price: ${price}
+          `);
+
           // const amountOutMin = ;
+          // Swap
+          // const router = dex.getRouter();
           // const tx = await router.swapExactTokensForTokens(
           //   amountin,
           //   amountOutMin,
