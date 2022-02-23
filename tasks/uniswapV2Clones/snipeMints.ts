@@ -1,9 +1,3 @@
-/**
- * Swap as soon as liquidity is added
- *
- * Docs swapExactTokensForTokens > https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens
- */
-
 import { BigNumber, ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
@@ -15,14 +9,14 @@ import { getRelativePrice } from "../../src/helpers/swaps";
 
 task(
   "uniswapV2Clone:snipeMints",
-  "Swap as soon as a Mint events happens on the given pair. Token should be pre-approved."
+  "Swap as soon as liquidity is added on the given pair. Token should be pre-approved."
 )
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")
   .addParam("pair", "Pair to spy")
   .addParam("token0", "Address of 1st token in the pair")
   .addParam("token1", "Address of 2nd token in the pair")
-  .addParam("digits0", "Digits of 1st token in pair", 18, types.int)
-  .addParam("digits1", "Digits of 2nd token in pair", 18, types.int)
+  .addParam("digits0", "Digits of 1st token in pair", undefined, types.int)
+  .addParam("digits1", "Digits of 2nd token in pair", undefined, types.int)
   .addParam("itokenin", "Index of token to sell (0 or 1)", undefined, types.int)
   .addParam("to", "Recipient of the swap output tokens")
   .addParam(
@@ -51,7 +45,7 @@ task(
   )
   .addOptionalParam(
     "dryrun",
-    "Do everything but the swap part",
+    "Stop right before the actual swap",
     true,
     types.boolean
   )
@@ -201,8 +195,8 @@ task(
               Small liquidity!
               ==================
               Exiting because liquidity add in token${itokenin} was too small
-              liquidityIn: ${ethers.utils.parseUnits(
-                liquidityInBigNumber.toString(),
+              liquidityIn: ${ethers.utils.formatUnits(
+                liquidityInBigNumber,
                 digitsIn
               )}
               minLiquidityIn: ${minliquidityin}
@@ -219,13 +213,14 @@ task(
             return false;
           }
           // Swap
+          // Docs > https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens
           // const router = dex.getRouter();
           // const swapTx = await router.swapExactTokensForTokens(
           //   amountInBigNumber,
           //   minAmountOutBigNumber,
           //   [tokenIn, tokenOut],
           //   to,
-          //   Date.now() + 1000 * 60 * deadline // 10 minutes
+          //   Date.now() + 1000 * 60 * deadline
           // );
           // const swapTxReceipt = await swapTx.wait();
           // console.log(`
