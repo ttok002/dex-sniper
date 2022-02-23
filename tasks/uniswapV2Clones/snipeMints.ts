@@ -137,6 +137,17 @@ task(
         provider,
         hre.network.name
       );
+      // Check that the given pair corresponds to the tokens
+      const expectedPair = await dex.getPairAddress(tokenIn, tokenOut);
+      if (expectedPair !== pair.toLowerCase()) {
+        console.log(`
+          Wrong pair!
+          ==============
+          given pair: ${pair}
+          expected: ${expectedPair}
+        `);
+        return false;
+      }
       // Start listening for add liquidity events
       dex.listenToMintOnce(
         pair,
