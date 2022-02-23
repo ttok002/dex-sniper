@@ -31,7 +31,6 @@ export function printMintEvent(
   sender: string,
   amount0: BigNumber,
   amount1: BigNumber,
-  to: string,
   tx: TransactionReceipt,
   digits0: number = 18,
   digits1: number = 18
@@ -43,7 +42,6 @@ export function printMintEvent(
         sender: ${sender}
         amount0: ${ethers.utils.formatUnits(amount0, digits0)}
         amount1: ${ethers.utils.formatUnits(amount1, digits1)}
-        to: ${to}
         block: ${tx.blockNumber}
     `);
 }

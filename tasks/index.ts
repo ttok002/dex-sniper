@@ -24,12 +24,3 @@ import "./uniswapV2Clones/snipeMints";
 import "./utils/getTimeFromBlock";
 import "./utils/getBlockFromTime";
 import "./utils/getLatestBlock";
-
-// DEX-specific tasks
-import "./uniswapV2/listenToPairCreated";
-import "./uniswapV2/listenToSwap";
-import "./uniswapV2/listenToSwapStandalone";
-import "./uniswapV3/listenToPoolCreated";
-import "./traderJoe/listenToSwap";
-import "./traderJoe/listenToSwapStandalone";
-import "./traderJoe/getRecentSwaps";

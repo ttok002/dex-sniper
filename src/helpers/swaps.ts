@@ -101,17 +101,17 @@ export function getSwapStats(
 }
 
 /**
- * Given the net amounts swapped in a swap, return the
+ * Given the amounts swapped in a swap, return the
  * price of token0 relative to token1.
  */
 export function getRelativePrice(
-  net0: BigNumber,
-  net1: BigNumber,
+  amount0: BigNumber,
+  amount1: BigNumber,
   digits0: number,
   digits1: number
 ): number {
   return Math.abs(
-    parseFloat(ethers.utils.formatUnits(net1, digits1)) /
-      parseFloat(ethers.utils.formatUnits(net0, digits0))
+    parseFloat(ethers.utils.formatUnits(amount0, digits1)) /
+      parseFloat(ethers.utils.formatUnits(amount1, digits0))
   );
 }
