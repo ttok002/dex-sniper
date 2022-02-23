@@ -2,6 +2,7 @@ import { BigNumber, ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { wait } from "../../src/helpers/general";
+import { validatePair } from "../../src/dexes/uniswapV2Clones/helpers/validation";
 import { getProvider } from "../../src/helpers/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { printMintEvent } from "../../src/helpers/debug";
@@ -138,14 +139,7 @@ task(
         hre.network.name
       );
       // Check that the given pair corresponds to the tokens
-      const expectedPair = await dex.getPairAddress(tokenIn, tokenOut);
-      if (expectedPair !== pair.toLowerCase()) {
-        console.log(`
-          Wrong pair!
-          ==============
-          given pair: ${pair}
-          expected: ${expectedPair}
-        `);
+      if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
         return false;
       }
       // Start listening for add liquidity events
