@@ -3,7 +3,7 @@ import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2
 import { getProvider } from "../../src/helpers/providers";
 
 task(
-  "utils:getPairAddress",
+  "uniswapV2Clone:getPairAddress",
   "Print the address of the liquidity pair corrisponding to the two given tokens. The order of the tokens is interchangeable."
 )
   .addPositionalParam("dexName", "DEX to consider, e.g. UniswapV2")

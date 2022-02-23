@@ -1,4 +1,4 @@
-import { Contract, ethers, Event, constants } from "ethers";
+import { Contract, ethers, Event, constants, BigNumber } from "ethers";
 import { Dex } from "../Dex";
 import {
   BurnEventCallback,
@@ -207,6 +207,22 @@ export abstract class UniswapV2Clone extends Dex {
       return null;
     }
     return checksum ? pairAddress : pairAddress.toLowerCase();
+  }
+
+  /**
+   * Given an amount you would like to sell on the pair token0-token1,
+   * return the estimated amount of token1 you would get with said swap.
+   *
+   * Does not support routing through multiple pairs.
+   */
+  async getAmountsOut(
+    amountIn: BigNumber,
+    token0: string,
+    token1: string
+  ): Promise<BigNumber[]> {
+    const router = this.getRouter();
+    const amountsOut = await router.getAmountsOut(amountIn, [token0, token1]);
+    return amountsOut;
   }
 
   /**

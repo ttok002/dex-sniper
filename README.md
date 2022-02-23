@@ -15,6 +15,7 @@ Snipe liquidity on popular decentralized exchanges.
 * Uniswap V2: Router 2 > [Etherscan](https://etherscan.io/address/0x7a250d5630b4cf539739df2c5dacb4c659f2488d#code), [Github](https://github.com/Uniswap/v2-periphery/blob/master/contracts/UniswapV2Router02.sol)
 * Uniswap V2: Factory > [Etherscan](https://etherscan.io/address/0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f#code),
 * Uniswap V2: Pool > [Etherscan](https://etherscan.io/address/0xB9Cfc842824709F11f0127cB86b3C9E440BD6819#code), [Github](https://github.com/Uniswap/v2-core/blob/master/contracts/interfaces/IUniswapV2Pair.sol)
+* Uniswap V2: Library > [Github](https://github.com/Uniswap/v2-periphery/blob/master/contracts/libraries/UniswapV2Library.sol), [Documentation](https://docs.uniswap.org/protocol/V2/reference/smart-contracts/library)
 * Uniswap V2: USDC-ETH Pool > [Etherscan](https://etherscan.io/address/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc#code), [Info](https://v2.info.uniswap.org/pair/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc)
 * Uniswap V2: USDC-ETH Pool token > [Etherscan](https://etherscan.io/token/0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc)
 

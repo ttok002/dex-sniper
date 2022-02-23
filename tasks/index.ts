@@ -23,8 +23,11 @@ import "./uniswapV2Clones/snipeMints";
 // One time operations
 import "./uniswapV2Clones/swap";
 
-// Utilities
+// DEX utilities
+import "./uniswapV2Clones/getPairAddress";
+import "./uniswapV2Clones/getAmountsOut";
+
+// Generic utilities
 import "./utils/getTimeFromBlock";
 import "./utils/getBlockFromTime";
 import "./utils/getLatestBlock";
-import "./utils/getPairAddress";
