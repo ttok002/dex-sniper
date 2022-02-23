@@ -27,6 +27,19 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
+   * Return the router contract with signing
+   * powers
+   */
+  getRouterSigner(): Contract {
+    this.validateSigner();
+    return new ethers.Contract(
+      this.routerAddress.toLowerCase(),
+      this.routerAbi,
+      this.signer
+    );
+  }
+
+  /**
    * Return the factory contract
    */
   getFactory(): Contract {
@@ -38,10 +51,32 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
+   * Return the factory contract with signing
+   * powers
+   */
+  getFactorySigner(): Contract {
+    this.validateSigner();
+    return new ethers.Contract(
+      this.factoryAddress.toLowerCase(),
+      this.factoryAbi,
+      this.signer
+    );
+  }
+
+  /**
    * Return the contract of a specific LP pair
    */
   getPair(pair: string): Contract {
     return new ethers.Contract(pair.toLowerCase(), this.pairAbi, this.provider);
+  }
+
+  /**
+   * Return the contract of a specific LP pair
+   * with signing powers
+   */
+  getPairSigner(pair: string): Contract {
+    this.validateSigner();
+    return new ethers.Contract(pair.toLowerCase(), this.pairAbi, this.signer);
   }
 
   /**
@@ -172,5 +207,14 @@ export abstract class UniswapV2Clone extends Dex {
       return null;
     }
     return checksum ? pairAddress : pairAddress.toLowerCase();
+  }
+
+  /**
+   * Throw an error if the dex cannot sign transactions
+   */
+  validateSigner() {
+    if (!this.signer) {
+      throw new Error("Signer not found!");
+    }
   }
 }

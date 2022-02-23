@@ -4,23 +4,29 @@ import { MadMeerkat } from "./MadMeerkat";
 import { UniswapV2Clone } from "./UniswapV2Clone";
 import { Provider } from "@ethersproject/abstract-provider";
 import { DexFactory } from "../DexFactory";
+import { Signer } from "ethers";
 
 /**
  * Insert here the DEXes that the bot should support
  */
 export class UniswapV2CloneFactory extends DexFactory {
-  create(dexName: string, provider: Provider, network: string): UniswapV2Clone {
+  create(
+    dexName: string,
+    provider: Provider,
+    network: string,
+    signer?: Signer
+  ): UniswapV2Clone {
     // Create DEX instance
     let dex;
     switch (dexName) {
       case "UniswapV2":
-        dex = new UniswapV2(provider);
+        dex = new UniswapV2(provider, signer);
         break;
       case "TraderJoe":
-        dex = new TraderJoe(provider);
+        dex = new TraderJoe(provider, signer);
         break;
       case "MadMeerkat":
-        dex = new MadMeerkat(provider);
+        dex = new MadMeerkat(provider, signer);
         break;
       default:
         throw new Error(`DEX ${dexName} not supported`);

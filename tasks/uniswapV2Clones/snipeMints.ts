@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { wait } from "../../src/helpers/general";
 import { validatePair } from "../../src/dexes/uniswapV2Clones/helpers/validation";
-import { getProvider } from "../../src/helpers/providers";
+import { getProvider, getSigner } from "../../src/helpers/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { printMintEvent } from "../../src/helpers/debug";
 import { getRelativePrice } from "../../src/helpers/swaps";
@@ -133,10 +133,12 @@ task(
       `);
       // Load credentials and get dex object
       const provider = getProvider(hre);
+      const signer = getSigner(hre, provider);
       const dex = new UniswapV2CloneFactory().create(
         dexName,
         provider,
-        hre.network.name
+        hre.network.name,
+        signer
       );
       // Check that the given pair corresponds to the tokens
       if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
@@ -219,7 +221,7 @@ task(
           }
           // Swap
           // Docs > https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens
-          // const router = dex.getRouter();
+          // const router = dex.getRouterSigner();
           // const swapTx = await router.swapExactTokensForTokens(
           //   amountInBigNumber,
           //   minAmountOutBigNumber,
