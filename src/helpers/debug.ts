@@ -15,16 +15,16 @@ export function printSwapEvent(
 ) {
   console.log(new Date());
   console.log(`
-        New swap detected
-        =================
-        sender: ${sender}
-        amount0In: ${ethers.utils.formatUnits(amount0In, digits0)}
-        amount1In: ${ethers.utils.formatUnits(amount1In, digits1)}
-        amount0Out: ${ethers.utils.formatUnits(amount0Out, digits0)}
-        amount1Out: ${ethers.utils.formatUnits(amount1Out, digits1)}
-        to: ${to}
-        block: ${tx.blockNumber}
-    `);
+    New swap detected
+    =================
+    sender: ${sender}
+    amount0In: ${ethers.utils.formatUnits(amount0In, digits0)} (${amount0In})
+    amount1In: ${ethers.utils.formatUnits(amount1In, digits1)} (${amount1In})
+    amount0Out: ${ethers.utils.formatUnits(amount0Out, digits0)} (${amount0Out})
+    amount1Out: ${ethers.utils.formatUnits(amount1Out, digits1)} (${amount1Out})
+    to: ${to}
+    block: ${tx.blockNumber}
+  `);
 }
 
 export function printMintEvent(
@@ -37,11 +37,11 @@ export function printMintEvent(
 ) {
   console.log(new Date());
   console.log(`
-        New mint detected
-        =================
-        sender: ${sender}
-        amount0: ${ethers.utils.formatUnits(amount0, digits0)}
-        amount1: ${ethers.utils.formatUnits(amount1, digits1)}
-        block: ${tx.blockNumber}
-    `);
+    New mint detected
+    =================
+    sender: ${sender}
+    amount0: ${ethers.utils.formatUnits(amount0, digits0)} (${amount0})
+    amount1: ${ethers.utils.formatUnits(amount1, digits1)} (${amount1})
+    block: ${tx.blockNumber}
+  `);
 }

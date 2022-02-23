@@ -61,6 +61,14 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
+   * Fire the given callback the next time a Mint (add liquidity)
+   * is made on the given pair
+   */
+  listenToMintOnce(pair: string, callback: MintEventCallback): void {
+    this.getPair(pair).once("Mint", callback);
+  }
+
+  /**
    * Fire the given callback everytime a Burn (remove liquidity)
    * is made on the given pair
    */

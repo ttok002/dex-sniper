@@ -1,3 +1,9 @@
+/**
+ * Swap as soon as liquidity is added
+ *
+ * Docs swapExactTokensForTokens > https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens
+ */
+
 import { BigNumber, ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
@@ -18,6 +24,7 @@ task(
   .addParam("digits0", "Digits of 1st token in pair", 18, types.int)
   .addParam("digits1", "Digits of 2nd token in pair", 18, types.int)
   .addParam("itokenin", "Index of token to sell (0 or 1)", undefined, types.int)
+  .addParam("to", "Recipient of the swap output tokens")
   .addParam(
     "amountin",
     "How much you are willing to spend",
@@ -31,10 +38,22 @@ task(
     types.float
   )
   .addParam(
-    "slippage",
-    "% you are willing to pay more compared to the price at them moment of the liquidity add",
+    "deadline",
+    "How many seconds should we try swapping",
     undefined,
     types.float
+  )
+  .addParam(
+    "minliquidityin",
+    "Swap only if the Mint added more liquidity than this in the token you are selling. Set to zero to always swap regardless.",
+    undefined,
+    types.float
+  )
+  .addOptionalParam(
+    "dryrun",
+    "Do everything but the swap part",
+    true,
+    types.boolean
   )
   .setAction(
     async (
@@ -46,9 +65,12 @@ task(
         digits0,
         digits1,
         itokenin,
+        to,
         amountin,
         minamountout,
-        slippage,
+        deadline,
+        minliquidityin,
+        dryrun,
       },
       hre
     ) => {
@@ -62,9 +84,12 @@ task(
         digits0: ${digits0}
         digits1: ${digits1}
         itokenin: ${itokenin}
+        to: ${to}
         amountin: ${amountin}
         minamountout: ${minamountout}
-        slippage: ${slippage}
+        deadline: ${deadline}
+        minliquidityin: ${minliquidityin}
+        dryrun: ${dryrun}
       `);
       // Determine which token we are selling and which we are buying
       let tokenIn: string,
@@ -98,6 +123,10 @@ task(
         minamountout + "",
         digitsOut
       );
+      const minLiquidityInBigNumber = ethers.utils.parseUnits(
+        minliquidityin + "",
+        digitsIn
+      );
       console.log(`
         Derived values
         =================
@@ -105,6 +134,7 @@ task(
         tokenOut: ${tokenOut}
         amountInBigNumber: ${amountInBigNumber}
         minAmountOutBigNumber: ${minAmountOutBigNumber}
+        minLiquidityInBigNumber: ${minLiquidityInBigNumber}
       `);
       // Load credentials and get dex object
       const provider = getProvider(hre);
@@ -114,9 +144,9 @@ task(
         hre.network.name
       );
       // Start listening for add liquidity events
-      dex.listenToMint(
+      dex.listenToMintOnce(
         pair,
-        (
+        async (
           mintSender: string,
           mintAmount0: BigNumber,
           mintAmount1: BigNumber,
@@ -132,23 +162,25 @@ task(
             digits1
           );
           // Compute price and minimum amount of tokenOut
-          let price: number;
+          let price: number, liquidityInBigNumber: BigNumber;
           switch (itokenin) {
             case 0:
-              price = getRelativePrice(
-                mintAmount1,
-                mintAmount0,
-                digits1,
-                digits0
-              );
-              break;
-            case 1:
               price = getRelativePrice(
                 mintAmount0,
                 mintAmount1,
                 digits0,
                 digits1
               );
+              liquidityInBigNumber = mintAmount0;
+              break;
+            case 1:
+              price = getRelativePrice(
+                mintAmount1,
+                mintAmount0,
+                digits1,
+                digits0
+              );
+              liquidityInBigNumber = mintAmount1;
               break;
             default:
               throw new Error(
@@ -160,20 +192,47 @@ task(
             ==================
             price: ${price}
           `);
-
-          // const amountOutMin = ;
+          // Exit if the liquidity added is too small
+          if (
+            minliquidityin &&
+            minLiquidityInBigNumber.gt(liquidityInBigNumber)
+          ) {
+            console.log(`
+              Small liquidity!
+              ==================
+              Exiting because liquidity add in token${itokenin} was too small
+              liquidityIn: ${ethers.utils.parseUnits(
+                liquidityInBigNumber.toString(),
+                digitsIn
+              )}
+              minLiquidityIn: ${minliquidityin}
+            `);
+            return;
+          }
+          // Exit if we are simulating
+          if (dryrun) {
+            console.log(`
+              Dry run
+              ==============
+              Exiting...
+            `);
+            return false;
+          }
           // Swap
           // const router = dex.getRouter();
-          // const tx = await router.swapExactTokensForTokens(
-          //   amountin,
-          //   amountOutMin,
+          // const swapTx = await router.swapExactTokensForTokens(
+          //   amountInBigNumber,
+          //   minAmountOutBigNumber,
           //   [tokenIn, tokenOut],
-          //   addresses.recipient,
-          //   Date.now() + 1000 * 60 * 10 // 10 minutes
+          //   to,
+          //   Date.now() + 1000 * 60 * deadline // 10 minutes
           // );
-          // const receipt = await tx.wait();
-          // console.log("Transaction receipt");
-          // console.log(receipt);
+          // const swapTxReceipt = await swapTx.wait();
+          // console.log(`
+          //   Swap receipt
+          //   ==============
+          // `);
+          // console.log(swapTxReceipt);
         }
       );
       return wait();

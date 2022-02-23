@@ -111,7 +111,7 @@ export function getRelativePrice(
   digits1: number
 ): number {
   return Math.abs(
-    parseFloat(ethers.utils.formatUnits(amount0, digits1)) /
-      parseFloat(ethers.utils.formatUnits(amount1, digits0))
+    parseFloat(ethers.utils.formatUnits(amount1, digits1)) /
+      parseFloat(ethers.utils.formatUnits(amount0, digits0))
   );
 }
