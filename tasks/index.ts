@@ -20,7 +20,11 @@ import "./uniswapV2Clones/getRecentMints";
 // Sniping
 import "./uniswapV2Clones/snipeMints";
 
+// One time operations
+import "./uniswapV2Clones/swap";
+
 // Utilities
 import "./utils/getTimeFromBlock";
 import "./utils/getBlockFromTime";
 import "./utils/getLatestBlock";
+import "./utils/getPairAddress";

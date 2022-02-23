@@ -1,4 +1,4 @@
-import { Contract, ethers, Event } from "ethers";
+import { Contract, ethers, Event, constants } from "ethers";
 import { Dex } from "../Dex";
 import {
   BurnEventCallback,
@@ -153,5 +153,24 @@ export abstract class UniswapV2Clone extends Dex {
     const factory = this.getFactory();
     const filter = factory.filters.PairCreated();
     return await factory.queryFilter(filter, fromBlock, toBlock);
+  }
+
+  /**
+   * Given the addresses of two tokens, return the address
+   * of the corresponding liquidity pair, if it exists.
+   *
+   * Returns null if there is no such pair.
+   */
+  async getPairAddress(
+    token0: string,
+    token1: string,
+    checksum = false
+  ): Promise<string | null> {
+    const factory = this.getFactory();
+    const pairAddress = await factory.getPair(token0, token1);
+    if (pairAddress === constants.AddressZero) {
+      return null;
+    }
+    return checksum ? pairAddress : pairAddress.toLowerCase();
   }
 }
