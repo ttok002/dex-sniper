@@ -47,16 +47,18 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
-* Snipe liquidity
-* Speed: input nonce manually?
-* Speed: compute gas manually?
-* printSwapReceipt should include swapped amounts from event
-* Provide examples on how to run tasks
-* Provide easy way to input addresses from CLI (preload tickers in ENV?)
-* Use Hardhat typechain mechanism to automatically generate types for event args
+* Optimize: continuous listening for snipes
+* Optimize: input nonce manually?
+* Optimize: compute gas manually?
+* Debug: printSwapReceipt should include swapped amounts from event
+* Refactor: how to simplify tasks with common args?
+* Docs: Provide examples on how to run tasks
+* Tooling: Provide easy way to input addresses from CLI (preload tickers in ENV?)
+* Tooling: Use Hardhat typechain mechanism to automatically generate types for event args
 
 # Done
 
+* Snipe liquidity
 * Swap task
 * In order to snipe should we listen to add liquidity or pair creation? > Add liquidity first
 * Listen to add and remove liquidity (mint and burn) in DEX class
