@@ -1,6 +1,7 @@
 import { task } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
 import { wait } from "../../src/helpers/general";
+import { printSwapEvent } from "../../src/helpers/print";
 import { getProvider } from "../../src/helpers/providers";
 
 task(
@@ -16,6 +17,6 @@ task(
       provider,
       hre.network.name
     );
-    dex.listenToSwap(pair, console.log);
+    dex.listenToSwap(pair, printSwapEvent);
     return wait();
   });

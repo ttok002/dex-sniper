@@ -2,6 +2,11 @@ import { ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { validatePair } from "../../src/dexes/uniswapV2Clones/helpers/validation";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
+import {
+  prettyPrint,
+  printAmounts,
+  printSwapReceipt,
+} from "../../src/helpers/print";
 import { getProvider, getSigner } from "../../src/helpers/providers";
 
 task(
@@ -42,7 +47,24 @@ task(
   )
   .setAction(
     async (
-      {
+      args: {
+        dexName: string;
+        pair: string;
+        token0: string;
+        token1: string;
+        digits0: number;
+        digits1: number;
+        itokenin: 0 | 1;
+        to: string;
+        amountin: number;
+        minamountout: number;
+        deadline: number;
+        dryrun: boolean;
+      },
+      hre
+    ) => {
+      prettyPrint("Arguments", args);
+      const {
         dexName,
         pair,
         token0,
@@ -55,25 +77,7 @@ task(
         minamountout,
         deadline,
         dryrun,
-      },
-      hre
-    ) => {
-      console.log(`
-         Arguments
-         =================
-         dexName: ${dexName}
-         pair: ${pair}
-         token0: ${token0}
-         token1: ${token1}
-         digits0: ${digits0}
-         digits1: ${digits1}
-         itokenin: ${itokenin}
-         to: ${to}
-         amountin: ${amountin}
-         minamountout: ${minamountout}
-         deadline: ${deadline}
-         dryrun: ${dryrun}
-       `);
+      } = args;
       // Determine which token we are selling and which we are buying
       let tokenIn: string,
         tokenOut: string,
@@ -106,14 +110,12 @@ task(
         minamountout + "",
         digitsOut
       );
-      console.log(`
-        Derived values
-        =================
-        tokenIn: ${tokenIn}
-        tokenOut: ${tokenOut}
-        amountInBigNumber: ${amountInBigNumber}
-        minAmountOutBigNumber: ${minAmountOutBigNumber}
-      `);
+      prettyPrint("Derived values", {
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
+        amountInBigNumber: amountInBigNumber,
+        minAmountOutBigNumber: minAmountOutBigNumber,
+      });
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
@@ -127,24 +129,17 @@ task(
       if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
         return false;
       }
-      // Get the expected amount of tokens
+      // Get the expected amount of tokens for debug purposes
       const router = dryrun ? dex.getRouter() : dex.getRouterSigner();
-      // const amounts = await router.getAmountsOut(amountInBigNumber, [
-      //   tokenIn,
-      //   tokenOut,
-      // ]);
-      // console.log(`
-      //   Get amounts
-      //   ==============
-      //   ${amounts}
-      // `);
+      const amounts = await dex.getAmountsOut(
+        amountInBigNumber,
+        tokenIn,
+        tokenOut
+      );
+      printAmounts(amounts, digitsIn, digitsOut);
       // Exit if we are simulating
       if (dryrun) {
-        console.log(`
-          Dry run
-          ==============
-          Exiting...
-        `);
+        prettyPrint("Dry run", { msg: "Exiting..." });
         return false;
       }
       // Swap
@@ -154,12 +149,13 @@ task(
         [tokenIn, tokenOut],
         to,
         Date.now() + 1000 * 60 * deadline
+        // {
+        //   gasLimit: 400000,
+        //   maxFeePerGas: ethers.utils.parseUnits("100", "gwei"),
+        //   maxPriorityFeePerGas: ethers.utils.parseUnits("10", "gwei"),
+        // }
       );
       const swapTxReceipt = await swapTx.wait();
-      console.log(`
-        Swap receipt
-        ==============
-      `);
-      console.log(swapTxReceipt);
+      printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
     }
   );

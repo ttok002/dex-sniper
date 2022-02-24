@@ -5,8 +5,11 @@ import { wait } from "../../src/helpers/general";
 import { validatePair } from "../../src/dexes/uniswapV2Clones/helpers/validation";
 import { getProvider, getSigner } from "../../src/helpers/providers";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { printMintEvent } from "../../src/helpers/debug";
-import { getRelativePrice } from "../../src/helpers/swaps";
+import {
+  prettyPrint,
+  printMintEvent,
+  printSwapReceipt,
+} from "../../src/helpers/print";
 
 task(
   "uniswapV2Clone:snipeMints",
@@ -52,7 +55,25 @@ task(
   )
   .setAction(
     async (
-      {
+      args: {
+        dexName: string;
+        pair: string;
+        token0: string;
+        token1: string;
+        digits0: number;
+        digits1: number;
+        itokenin: 0 | 1;
+        to: string;
+        amountin: number;
+        minamountout: number;
+        deadline: number;
+        minliquidityin: number;
+        dryrun: boolean;
+      },
+      hre
+    ) => {
+      prettyPrint("Arguments", args);
+      const {
         dexName,
         pair,
         token0,
@@ -66,26 +87,7 @@ task(
         deadline,
         minliquidityin,
         dryrun,
-      },
-      hre
-    ) => {
-      console.log(`
-        Arguments
-        =================
-        dexName: ${dexName}
-        pair: ${pair}
-        token0: ${token0}
-        token1: ${token1}
-        digits0: ${digits0}
-        digits1: ${digits1}
-        itokenin: ${itokenin}
-        to: ${to}
-        amountin: ${amountin}
-        minamountout: ${minamountout}
-        deadline: ${deadline}
-        minliquidityin: ${minliquidityin}
-        dryrun: ${dryrun}
-      `);
+      } = args;
       // Determine which token we are selling and which we are buying
       let tokenIn: string,
         tokenOut: string,
@@ -122,15 +124,13 @@ task(
         minliquidityin + "",
         digitsIn
       );
-      console.log(`
-        Derived values
-        =================
-        tokenIn: ${tokenIn}
-        tokenOut: ${tokenOut}
-        amountInBigNumber: ${amountInBigNumber}
-        minAmountOutBigNumber: ${minAmountOutBigNumber}
-        minLiquidityInBigNumber: ${minLiquidityInBigNumber}
-      `);
+      prettyPrint("Derived values", {
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
+        amountInBigNumber: amountInBigNumber,
+        minAmountOutBigNumber: minAmountOutBigNumber,
+        minLiquidityInBigNumber: minLiquidityInBigNumber,
+      });
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
@@ -163,36 +163,8 @@ task(
             digits1
           );
           // Compute price and minimum amount of tokenOut
-          let price: number, liquidityInBigNumber: BigNumber;
-          switch (itokenin) {
-            case 0:
-              price = getRelativePrice(
-                mintAmount0,
-                mintAmount1,
-                digits0,
-                digits1
-              );
-              liquidityInBigNumber = mintAmount0;
-              break;
-            case 1:
-              price = getRelativePrice(
-                mintAmount1,
-                mintAmount0,
-                digits1,
-                digits0
-              );
-              liquidityInBigNumber = mintAmount1;
-              break;
-            default:
-              throw new Error(
-                `Parameter itokenin must be either 0 or 1, given '${itokenin}'`
-              );
-          }
-          console.log(`
-            Price of token${itokenin}
-            ==================
-            price: ${price}
-          `);
+          const liquidityInBigNumber =
+            itokenin === 0 ? mintAmount0 : mintAmount1;
           // Exit if the liquidity added is too small
           if (
             minliquidityin &&
@@ -212,29 +184,20 @@ task(
           }
           // Exit if we are simulating
           if (dryrun) {
-            console.log(`
-              Dry run
-              ==============
-              Exiting...
-            `);
+            prettyPrint("Dry run", { msg: "Exiting..." });
             return false;
           }
           // Swap
-          // Docs > https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens
-          // const router = dex.getRouterSigner();
-          // const swapTx = await router.swapExactTokensForTokens(
-          //   amountInBigNumber,
-          //   minAmountOutBigNumber,
-          //   [tokenIn, tokenOut],
-          //   to,
-          //   Date.now() + 1000 * 60 * deadline
-          // );
-          // const swapTxReceipt = await swapTx.wait();
-          // console.log(`
-          //   Swap receipt
-          //   ==============
-          // `);
-          // console.log(swapTxReceipt);
+          const router = dex.getRouterSigner();
+          const swapTx = await router.swapExactTokensForTokens(
+            amountInBigNumber,
+            minAmountOutBigNumber,
+            [tokenIn, tokenOut],
+            to,
+            Date.now() + 1000 * 60 * deadline
+          );
+          const swapTxReceipt = await swapTx.wait();
+          printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
         }
       );
       return wait();

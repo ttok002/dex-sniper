@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { UniswapV2CloneFactory } from "../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory";
+import { printAmounts } from "../../src/helpers/print";
 import { getProvider } from "../../src/helpers/providers";
 
 task(
@@ -24,20 +25,11 @@ task(
         provider,
         hre.network.name
       );
-      const amountsOut = await dex.getAmountsOut(
+      const amounts = await dex.getAmountsOut(
         ethers.utils.parseUnits(amountIn + "", digits0),
         token0,
         token1
       );
-      console.log(`
-        Amounts
-        ===============
-        tokenIn: ${ethers.utils.formatUnits(amountsOut[0], digits0)} (${
-        amountsOut[0]
-      })
-        tokenOut: ${ethers.utils.formatUnits(amountsOut[1], digits1)} (${
-        amountsOut[1]
-      })
-    `);
+      printAmounts(amounts, digits0, digits1);
     }
   );
