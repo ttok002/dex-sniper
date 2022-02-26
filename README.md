@@ -48,7 +48,7 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 # To do
 
 * Optimize: compute gas manually?
-* Optimize: input nonce manually?
+* Optimize: input nonce manually? Yes!
 * Optimize: continuous listening for snipes
 * Debug: printSwapReceipt should include swapped amounts from event
 * Refactor: how to simplify tasks with common args?
