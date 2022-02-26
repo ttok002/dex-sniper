@@ -2,24 +2,35 @@ import { Provider } from "@ethersproject/providers";
 import { Signer } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { URL } from "url";
+import { logger, LOGGING, onProviderDebug } from "../common/logger";
 
 /**
  * Return either an HTTP Provider or a WebSocket provider
  * depending on the network URL given to Hardhat.
  */
-export function getProvider(hre: HardhatRuntimeEnvironment): Provider {
-  // @ts-ignore
-  const url = new URL(hre.network.config.url);
-  console.log(`Node: ${url}`);
+export function getProvider({
+  network,
+  ethers,
+}: HardhatRuntimeEnvironment): Provider {
+  const url = new URL((network as any).config.url);
+  logger.debug(`> Node: ${url}`);
+  let provider: Provider;
   switch (url.protocol) {
     case "http:":
     case "https:":
-      return new hre.ethers.providers.JsonRpcProvider(url.href);
+      provider = new ethers.providers.JsonRpcProvider(url.href);
+      break;
     case "wss:":
-      return new hre.ethers.providers.WebSocketProvider(url.href);
+      provider = new ethers.providers.WebSocketProvider(url.href);
+      break;
     default:
       throw new Error(`Network URL not valid: '${url.href}'`);
   }
+  // Debug
+  if (LOGGING) {
+    provider.on("debug", onProviderDebug);
+  }
+  return provider;
 }
 
 /**
@@ -33,7 +44,7 @@ export function getSigner(
   if (!provider) {
     provider = getProvider(hre);
   }
-  // @ts-ignore
-  const keyOfFirstAccount = hre.network.config.accounts[0] as string;
-  return new hre.ethers.Wallet(keyOfFirstAccount, provider);
+  const { network, ethers } = hre;
+  const keyOfFirstAccount = (network as any).config.accounts[0] as string;
+  return new ethers.Wallet(keyOfFirstAccount, provider);
 }
