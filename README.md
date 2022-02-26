@@ -47,17 +47,19 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
-* Optimize: continuous listening for snipes
-* Optimize: input nonce manually?
 * Optimize: compute gas manually?
+* Optimize: input nonce manually?
+* Optimize: continuous listening for snipes
 * Debug: printSwapReceipt should include swapped amounts from event
 * Refactor: how to simplify tasks with common args?
+* Optimize: batch requests? https://github.com/ethers-io/ethers.js/issues/892
 * Docs: Provide examples on how to run tasks
 * Tooling: Provide easy way to input addresses from CLI (preload tickers in ENV?)
 * Tooling: Use Hardhat typechain mechanism to automatically generate types for event args
 
 # Done
 
+* Logging requests
 * Snipe liquidity
 * Swap task
 * In order to snipe should we listen to add liquidity or pair creation? > Add liquidity first
