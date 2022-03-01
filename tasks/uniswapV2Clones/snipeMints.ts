@@ -21,7 +21,7 @@ task(
   .addParam('to', 'Recipient of the swap output tokens')
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
-  .addParam('deadline', 'How many seconds should we try swapping', undefined, types.float)
+  .addOptionalParam('deadline', 'How many seconds should we try swapping', 120, types.float)
   .addOptionalParam(
     'minliquidityin',
     'Swap only if the Mint added more than this liquidity in the token you are selling. Set to zero to always swap regardless.',
