@@ -43,7 +43,7 @@ export function onProviderDebug(info: Record<string, any>) {
     }
   }
   // Log responses
-  if (info.action === 'response') {
+  else if (info.action === 'response') {
     switch (LOG_RESPONSES) {
       case 1:
         console.log(`> Response`);
@@ -52,5 +52,8 @@ export function onProviderDebug(info: Record<string, any>) {
       default:
         break;
     }
+  } else {
+    console.log(`Unknown debug type ${info.action}`);
+    console.log(info);
   }
 }
