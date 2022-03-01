@@ -1,4 +1,4 @@
-import { UniswapV2Clone } from "../UniswapV2Clone";
+import { UniswapV2Clone } from '../UniswapV2Clone';
 
 /**
  * Check if the given pair corresponds to the given tokens,

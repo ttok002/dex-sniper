@@ -1,5 +1,5 @@
-import { BigNumber, ethers, Event } from "ethers";
-import { SwapEvent, SwapRecordRaw, SwapRecordStat } from "../dexes/types";
+import { BigNumber, ethers, Event } from 'ethers';
+import { SwapEvent, SwapRecordRaw, SwapRecordStat } from '../dexes/types';
 
 /**
  * Convert a Swap event to a flat object suitable to
@@ -11,10 +11,8 @@ export function getSwapRecordRaw(
   digits1: number = 18
 ): SwapRecordRaw {
   const e = (event as any).args as SwapEvent;
-  const format0 = (n: BigNumber) =>
-    ethers.utils.formatUnits(e.amount0In, digits0);
-  const format1 = (n: BigNumber) =>
-    ethers.utils.formatUnits(e.amount0In, digits1);
+  const format0 = (n: BigNumber) => ethers.utils.formatUnits(e.amount0In, digits0);
+  const format1 = (n: BigNumber) => ethers.utils.formatUnits(e.amount0In, digits1);
   return {
     blockNumber: event.blockNumber,
     sender: e.sender,
@@ -45,23 +43,9 @@ export function getSwapRecordStat(
   const e = (event as any).args as SwapEvent;
   let stats;
   if (mainToken === 0) {
-    stats = getSwapStats(
-      e.amount0In,
-      e.amount0Out,
-      e.amount1In,
-      e.amount1Out,
-      digits0,
-      digits1
-    );
+    stats = getSwapStats(e.amount0In, e.amount0Out, e.amount1In, e.amount1Out, digits0, digits1);
   } else if (mainToken === 1) {
-    stats = getSwapStats(
-      e.amount1In,
-      e.amount1Out,
-      e.amount0In,
-      e.amount0Out,
-      digits1,
-      digits0
-    );
+    stats = getSwapStats(e.amount1In, e.amount1Out, e.amount0In, e.amount0Out, digits1, digits0);
   } else {
     throw new Error(`mainToken must be either 0 or 1, ${mainToken} given`);
   }

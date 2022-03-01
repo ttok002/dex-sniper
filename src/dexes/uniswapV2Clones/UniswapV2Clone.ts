@@ -1,29 +1,25 @@
-import { Contract, ethers, Event, constants, BigNumber } from "ethers";
-import { Dex } from "../Dex";
+import { Contract, ethers, Event, constants, BigNumber } from 'ethers';
+import { Dex } from '../Dex';
 import {
   BurnEventCallback,
   MintEventCallback,
   PairCreatedEventCallback,
   SwapEventCallback,
-} from "../types";
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
+} from '../types';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 
 export abstract class UniswapV2Clone extends Dex {
   abstract routerAddress: string;
   abstract factoryAddress: string;
-  routerAbi = require("./abi/uniswapV2/router.json");
-  pairAbi = require("./abi/uniswapV2/pair.json");
-  factoryAbi = require("./abi/uniswapV2/factory.json");
+  routerAbi = require('./abi/uniswapV2/router.json');
+  pairAbi = require('./abi/uniswapV2/pair.json');
+  factoryAbi = require('./abi/uniswapV2/factory.json');
 
   /**
    * Return the router contract
    */
   getRouter(): Contract {
-    return new ethers.Contract(
-      this.routerAddress.toLowerCase(),
-      this.routerAbi,
-      this.provider
-    );
+    return new ethers.Contract(this.routerAddress.toLowerCase(), this.routerAbi, this.provider);
   }
 
   /**
@@ -32,22 +28,14 @@ export abstract class UniswapV2Clone extends Dex {
    */
   getRouterSigner(): Contract {
     this.validateSigner();
-    return new ethers.Contract(
-      this.routerAddress.toLowerCase(),
-      this.routerAbi,
-      this.signer
-    );
+    return new ethers.Contract(this.routerAddress.toLowerCase(), this.routerAbi, this.signer);
   }
 
   /**
    * Return the factory contract
    */
   getFactory(): Contract {
-    return new ethers.Contract(
-      this.factoryAddress.toLowerCase(),
-      this.factoryAbi,
-      this.provider
-    );
+    return new ethers.Contract(this.factoryAddress.toLowerCase(), this.factoryAbi, this.provider);
   }
 
   /**
@@ -56,11 +44,7 @@ export abstract class UniswapV2Clone extends Dex {
    */
   getFactorySigner(): Contract {
     this.validateSigner();
-    return new ethers.Contract(
-      this.factoryAddress.toLowerCase(),
-      this.factoryAbi,
-      this.signer
-    );
+    return new ethers.Contract(this.factoryAddress.toLowerCase(), this.factoryAbi, this.signer);
   }
 
   /**
@@ -84,7 +68,7 @@ export abstract class UniswapV2Clone extends Dex {
    * on the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
-    this.getPair(pair).on("Swap", callback);
+    this.getPair(pair).on('Swap', callback);
   }
 
   /**
@@ -92,7 +76,7 @@ export abstract class UniswapV2Clone extends Dex {
    * is made on the given pair
    */
   listenToMint(pair: string, callback: MintEventCallback): void {
-    this.getPair(pair).on("Mint", callback);
+    this.getPair(pair).on('Mint', callback);
   }
 
   /**
@@ -100,7 +84,7 @@ export abstract class UniswapV2Clone extends Dex {
    * is made on the given pair
    */
   listenToMintOnce(pair: string, callback: MintEventCallback): void {
-    this.getPair(pair).once("Mint", callback);
+    this.getPair(pair).once('Mint', callback);
   }
 
   /**
@@ -108,7 +92,7 @@ export abstract class UniswapV2Clone extends Dex {
    * is made on the given pair
    */
   listenToBurn(pair: string, callback: BurnEventCallback): void {
-    this.getPair(pair).on("Burn", callback);
+    this.getPair(pair).on('Burn', callback);
   }
 
   /**
@@ -116,7 +100,7 @@ export abstract class UniswapV2Clone extends Dex {
    * created
    */
   listenToPairCreated(callback: PairCreatedEventCallback): void {
-    this.getFactory().on("PairCreated", callback);
+    this.getFactory().on('PairCreated', callback);
   }
 
   /**
@@ -124,11 +108,7 @@ export abstract class UniswapV2Clone extends Dex {
    *
    * Docs: https://docs.ethers.io/v5/getting-started/#getting-started--history
    */
-  async getSwapHistory(
-    pair: string,
-    fromBlock?: number,
-    toBlock?: number
-  ): Promise<Event[]> {
+  async getSwapHistory(pair: string, fromBlock?: number, toBlock?: number): Promise<Event[]> {
     const pool = this.getPair(pair);
     const filter = pool.filters.Swap();
     return await pool.queryFilter(filter, fromBlock, toBlock);
@@ -138,11 +118,7 @@ export abstract class UniswapV2Clone extends Dex {
    * Return the list of Mint events (liquidity add) for the given
    * pair.
    */
-  async getMintHistory(
-    pair: string,
-    fromBlock?: number,
-    toBlock?: number
-  ): Promise<Event[]> {
+  async getMintHistory(pair: string, fromBlock?: number, toBlock?: number): Promise<Event[]> {
     const pool = this.getPair(pair);
     const filter = pool.filters.Mint();
     return await pool.queryFilter(filter, fromBlock, toBlock);
@@ -154,10 +130,7 @@ export abstract class UniswapV2Clone extends Dex {
    *
    * Order is important.
    */
-  async getPairCreationTx(
-    token0: string,
-    token1: string
-  ): Promise<TransactionReceipt> {
+  async getPairCreationTx(token0: string, token1: string): Promise<TransactionReceipt> {
     const factory = this.getFactory();
     const filter = factory.filters.PairCreated(
       token0.toLowerCase(),
@@ -181,10 +154,7 @@ export abstract class UniswapV2Clone extends Dex {
   /**
    * Return the list of pair creation events.
    */
-  async getPairCreationHistory(
-    fromBlock?: number,
-    toBlock?: number
-  ): Promise<Event[]> {
+  async getPairCreationHistory(fromBlock?: number, toBlock?: number): Promise<Event[]> {
     const factory = this.getFactory();
     const filter = factory.filters.PairCreated();
     return await factory.queryFilter(filter, fromBlock, toBlock);
@@ -196,11 +166,7 @@ export abstract class UniswapV2Clone extends Dex {
    *
    * Returns null if there is no such pair.
    */
-  async getPairAddress(
-    token0: string,
-    token1: string,
-    checksum = false
-  ): Promise<string | null> {
+  async getPairAddress(token0: string, token1: string, checksum = false): Promise<string | null> {
     const factory = this.getFactory();
     const pairAddress = await factory.getPair(token0, token1);
     if (pairAddress === constants.AddressZero) {
@@ -215,11 +181,7 @@ export abstract class UniswapV2Clone extends Dex {
    *
    * Does not support routing through multiple pairs.
    */
-  async getAmountsOut(
-    amountIn: BigNumber,
-    token0: string,
-    token1: string
-  ): Promise<BigNumber[]> {
+  async getAmountsOut(amountIn: BigNumber, token0: string, token1: string): Promise<BigNumber[]> {
     const router = this.getRouter();
     const amountsOut = await router.getAmountsOut(amountIn, [token0, token1]);
     return amountsOut;
@@ -230,7 +192,7 @@ export abstract class UniswapV2Clone extends Dex {
    */
   validateSigner() {
     if (!this.signer) {
-      throw new Error("Signer not found!");
+      throw new Error('Signer not found!');
     }
   }
 }

@@ -1,5 +1,5 @@
-import { Provider } from "@ethersproject/providers";
-import { Signer } from "ethers";
+import { Provider } from '@ethersproject/providers';
+import { Signer } from 'ethers';
 
 /**
  * Class representing a DEX with which we interact

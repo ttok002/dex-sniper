@@ -1,6 +1,6 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
-import { ethers } from "ethers";
+import { BigNumber } from '@ethersproject/bignumber';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
+import { ethers } from 'ethers';
 
 /**
  * Pretty print a Swap event; suitable to
@@ -17,19 +17,13 @@ export function printSwapEvent(
   digits0: number = 18,
   digits1: number = 18
 ) {
-  prettyPrint("New swap detected", {
+  prettyPrint('New swap detected', {
     date: new Date(),
     sender: sender,
     amount0In: `${ethers.utils.formatUnits(amount0In, digits0)} (${amount0In})`,
     amount1In: `${ethers.utils.formatUnits(amount1In, digits1)} (${amount1In})`,
-    amount0Out: `${ethers.utils.formatUnits(
-      amount0Out,
-      digits0
-    )} (${amount0Out})`,
-    amount1Out: `${ethers.utils.formatUnits(
-      amount1Out,
-      digits1
-    )} (${amount1Out})`,
+    amount0Out: `${ethers.utils.formatUnits(amount0Out, digits0)} (${amount0Out})`,
+    amount1Out: `${ethers.utils.formatUnits(amount1Out, digits1)} (${amount1Out})`,
     to: to,
     block: tx.blockNumber,
   });
@@ -47,7 +41,7 @@ export function printMintEvent(
   digits0: number = 18,
   digits1: number = 18
 ) {
-  prettyPrint("New mint detected", {
+  prettyPrint('New mint detected', {
     date: new Date(),
     sender: sender,
     amount0: `${ethers.utils.formatUnits(amount0, digits0)} (${amount0})`,
@@ -60,16 +54,10 @@ export function printMintEvent(
  * Pretty print the output of the getAmountsOut
  * function.
  */
-export function printAmounts(
-  amounts: BigNumber[],
-  digits0: number,
-  digits1: number
-) {
-  prettyPrint("Amounts", {
+export function printAmounts(amounts: BigNumber[], digits0: number, digits1: number) {
+  prettyPrint('Amounts', {
     tokenIn: `${ethers.utils.formatUnits(amounts[0], digits0)} (${amounts[0]})`,
-    tokenOut: `${ethers.utils.formatUnits(amounts[1], digits1)} (${
-      amounts[1]
-    })`,
+    tokenOut: `${ethers.utils.formatUnits(amounts[1], digits1)} (${amounts[1]})`,
   });
 }
 
@@ -81,7 +69,7 @@ export function printSwapReceipt(
   digitsIn: number = 18,
   digitsOut: number = 18
 ) {
-  printTxReceipt(tx, "Swap receipt");
+  printTxReceipt(tx, 'Swap receipt');
 }
 
 /***
@@ -89,24 +77,19 @@ export function printSwapReceipt(
  */
 export function printTxReceipt(
   tx: TransactionReceipt,
-  title: string = "Tx receipt",
+  title: string = 'Tx receipt',
   extraLinesBefore: Record<string, any> = {},
   extraLinesAfter: Record<string, any> = {}
 ) {
-  const status = tx.status === 1 ? "OK" : "ERROR!";
-  const type = tx.type === 2 ? "EIP-1559" : "Legacy";
+  const status = tx.status === 1 ? 'OK' : 'ERROR!';
+  const type = tx.type === 2 ? 'EIP-1559' : 'Legacy';
   const lines = {
     hash: tx.transactionHash,
     status: `${status} (${tx.status})`,
     to: tx.to,
     block: tx.blockNumber,
-    "Transaction Fee": `${ethers.utils.formatUnits(
-      tx.effectiveGasPrice.mul(tx.gasUsed)
-    )} ETH`,
-    effectiveGasPrice: `${ethers.utils.formatUnits(
-      tx.effectiveGasPrice,
-      9
-    )} gwei`,
+    'Transaction Fee': `${ethers.utils.formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`,
+    effectiveGasPrice: `${ethers.utils.formatUnits(tx.effectiveGasPrice, 9)} gwei`,
     gasUsed: tx.gasUsed,
     cumulativeGasUsed: tx.cumulativeGasUsed,
     type: `${type} (${tx.type})`,
@@ -118,11 +101,7 @@ export function printTxReceipt(
 /**
  * Pretty print an info message
  */
-export function prettyPrint(
-  title: string,
-  lines: Record<string, any>,
-  nPadding: number = 4
-) {
+export function prettyPrint(title: string, lines: Record<string, any>, nPadding: number = 4) {
   console.log(buildPrettyPrint(title, lines, nPadding));
 }
 
@@ -134,15 +113,15 @@ export function buildPrettyPrint(
   lines: Record<string, any>,
   nPadding: number
 ): string {
-  let padding: string = "";
+  let padding: string = '';
   for (let i = 0; i < nPadding; i++) {
-    padding += " ";
+    padding += ' ';
   }
   let output = `${padding}${title}\n`;
   const nFooter = title.length;
-  let footer: string = "";
+  let footer: string = '';
   for (let i = 0; i < nFooter; i++) {
-    footer += "=";
+    footer += '=';
   }
   output += `${padding}${footer}\n`;
   for (const key in lines) {

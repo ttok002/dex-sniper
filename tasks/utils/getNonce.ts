@@ -1,8 +1,8 @@
-import { task } from "hardhat/config";
-import { getProvider, getSigner } from "../../src/helpers/providers";
+import { task } from 'hardhat/config';
+import { getProvider, getSigner } from '../../src/helpers/providers';
 
-task("utils:getNonce", "Get nonce (number of txs) of current wallet")
-  .addOptionalPositionalParam("address")
+task('utils:getNonce', 'Get nonce (number of txs) of current wallet')
+  .addOptionalPositionalParam('address')
   .setAction(async ({ address }, hre) => {
     let nonce;
     if (address) {

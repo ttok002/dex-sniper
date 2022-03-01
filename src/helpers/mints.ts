@@ -1,6 +1,6 @@
-import { ethers, Event } from "ethers";
-import { MintEvent, MintRecordRaw, MintRecordStat } from "../dexes/types";
-import { getRelativePrice } from "./swaps";
+import { ethers, Event } from 'ethers';
+import { MintEvent, MintRecordRaw, MintRecordStat } from '../dexes/types';
+import { getRelativePrice } from './swaps';
 
 /**
  * Convert a Mint event to a flat object suitable to

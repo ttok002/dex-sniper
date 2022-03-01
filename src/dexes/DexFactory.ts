@@ -1,5 +1,5 @@
-import { Dex } from "./Dex";
-import { Provider } from "@ethersproject/abstract-provider";
+import { Dex } from './Dex';
+import { Provider } from '@ethersproject/abstract-provider';
 
 /**
  * Base class for the DEX factories.

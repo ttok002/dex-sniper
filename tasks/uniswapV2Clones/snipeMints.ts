@@ -7,7 +7,10 @@ import { getProvider, getSigner } from '../../src/helpers/providers';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { prettyPrint, printMintEvent, printSwapReceipt } from '../../src/helpers/print';
 
-task('uniswapV2Clone:snipeMints', 'Swap as soon as liquidity is added on the given pair. Token should be pre-approved.')
+task(
+  'uniswapV2Clone:snipeMints',
+  'Swap as soon as liquidity is added on the given pair. Token should be pre-approved.'
+)
   .addPositionalParam('dexName', 'DEX to consider, e.g. UniswapV2')
   .addParam('pair', 'Pair to spy')
   .addParam('token0', 'Address of 1st token in the pair')

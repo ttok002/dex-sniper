@@ -1,5 +1,5 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { TransactionReceipt } from "@ethersproject/abstract-provider";
+import { BigNumber } from '@ethersproject/bignumber';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 
 /**
  * The callback of a Swap event on the pair
@@ -20,12 +20,7 @@ export interface SwapEventCallback {
  * The callback of a Mint event on the pair
  */
 export interface MintEventCallback {
-  (
-    sender: string,
-    amount0: BigNumber,
-    amount1: BigNumber,
-    tx: TransactionReceipt
-  ): void;
+  (sender: string, amount0: BigNumber, amount1: BigNumber, tx: TransactionReceipt): void;
 }
 
 /**
@@ -90,7 +85,7 @@ export interface SwapRecordStat {
   Sender: string;
   To: string;
   Transaction: string;
-  "Block Diff"?: number;
+  'Block Diff'?: number;
 }
 
 /**
@@ -125,5 +120,5 @@ export interface MintRecordStat {
   Price: number;
   Sender: string;
   Transaction: string;
-  "Block Diff"?: number;
+  'Block Diff'?: number;
 }
