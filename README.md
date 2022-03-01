@@ -47,9 +47,9 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # To do
 
-- Optimize: compute gas manually?
-- Optimize: input nonce manually? Yes!
 - Optimize: continuous listening for snipes
+- Nonce: make sure the nonce is correctly update if the transaction fails (or maybe simply update it with on-chain data?)
+- Optimize: compute gas manually?
 - Debug: printSwapReceipt should include swapped amounts from event
 - Refactor: how to simplify tasks with common args?
 - Optimize: batch requests? https://github.com/ethers-io/ethers.js/issues/892
@@ -59,6 +59,7 @@ The contract addresses of Trader Joe's pairs can be found on their [Analytics Pa
 
 # Done
 
+- Optimize: input nonce manually? Yes!
 - Logging requests
 - Snipe liquidity
 - Swap task

@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, Overrides } from 'ethers';
 import { task, types } from 'hardhat/config';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
 import { wait } from '../../src/helpers/general';
@@ -21,6 +21,12 @@ task(
   .addParam('to', 'Recipient of the swap output tokens')
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
+  .addOptionalParam(
+    'fastnonce',
+    'Keep track of nonce internally for faster performance. Do not sign txs while the script is running, lest you mess the nonce count',
+    false,
+    types.boolean
+  )
   .addOptionalParam('deadline', 'How many seconds should we try swapping', 120, types.float)
   .addOptionalParam(
     'minliquidityin',
@@ -42,6 +48,7 @@ task(
         to: string;
         amountin: number;
         minamountout: number;
+        fastnonce: boolean;
         deadline: number;
         minliquidityin: number;
         dryrun: boolean;
@@ -49,7 +56,10 @@ task(
       hre
     ) => {
       prettyPrint('Arguments', args);
-      const { dexName, pair, token0, token1, digits0, digits1, itokenin, to, amountin, minamountout, deadline, minliquidityin, dryrun } = args; // prettier-ignore
+      // Given parameters
+      const { dexName, pair, token0, token1, digits0, digits1, itokenin, to, amountin, minamountout, fastnonce, deadline, minliquidityin, dryrun } = args; // prettier-ignore
+      // Computed values
+      let nonce: number;
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
       switch (itokenin) {
@@ -81,6 +91,10 @@ task(
       if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
         return false;
       }
+      // Get initial nonce
+      if (fastnonce) {
+        nonce = await signer.getTransactionCount();
+      }
       // Start listening for add liquidity events
       dex.listenToMintOnce(
         pair,
@@ -110,6 +124,11 @@ task(
             prettyPrint('Dry run', { msg: 'Exiting...' });
             return false;
           }
+          // Optionally, compute nonce & gas manually
+          const swapOverrides: Overrides = {};
+          if (fastnonce) {
+            swapOverrides.nonce = nonce;
+          }
           // Swap
           const router = dex.getRouterSigner();
           const swapTx = await router.swapExactTokensForTokens(
@@ -117,10 +136,15 @@ task(
             minAmountOutBigNumber,
             [tokenIn, tokenOut],
             to,
-            Date.now() + 1000 * 60 * deadline
+            Date.now() + 1000 * 60 * deadline,
+            swapOverrides
           );
           const swapTxReceipt = await swapTx.wait();
           printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
+          // Increment nonce
+          if (fastnonce) {
+            nonce += 1;
+          }
         }
       );
       return wait();
