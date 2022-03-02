@@ -21,6 +21,9 @@ task(
   .addParam('to', 'Recipient of the swap output tokens')
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
+  .addOptionalParam('gasLimit', 'Maximum gas to use', 0, types.int)
+  .addOptionalParam('maxFeePerGas', 'Max gwei to pay per unit of gas', 0.0, types.float)
+  .addOptionalParam('maxPriorityFeePerGas', 'Max gwei for the miner tip', 0.0, types.float)
   .addOptionalParam(
     'fastnonce',
     'Keep track of nonce internally for faster performance. Do not sign txs while the script is running, lest you mess the nonce count',
@@ -50,6 +53,9 @@ task(
         amountin: number;
         minamountout: number;
         fastnonce: boolean;
+        gasLimit: number;
+        maxFeePerGas: number;
+        maxPriorityFeePerGas: number;
         deadline: number;
         minliquidityin: number;
         runonce: boolean;
@@ -59,32 +65,21 @@ task(
     ) => {
       prettyPrint('Arguments', args);
       // Given parameters
-      const { dexName, pair, token0, token1, digits0, digits1, itokenin, to, amountin, minamountout, fastnonce, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
-      // Computed values
-      let nonce: number;
+      const { dexName, pair, token0, token1, digits0, digits1, itokenin, to, amountin, minamountout, fastnonce, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
-      switch (itokenin) {
-        case 0:
-          (tokenIn = token0), (tokenOut = token1), (digitsIn = digits0), (digitsOut = digits1);
-          break;
-        case 1:
-          (tokenIn = token1), (tokenOut = token0), (digitsIn = digits1), (digitsOut = digits0);
-          break;
-        default:
-          throw new Error(`Parameter itokenin must be either 0 or 1, given '${itokenin}'`);
+      if (itokenin === 0) {
+        (tokenIn = token0), (tokenOut = token1), (digitsIn = digits0), (digitsOut = digits1);
+      } else if (itokenin === 1) {
+        (tokenIn = token1), (tokenOut = token0), (digitsIn = digits1), (digitsOut = digits0);
+      } else {
+        throw new Error(`Parameter itokenin must be either 0 or 1, given '${itokenin}'`);
       }
       // Get the amounts in blockchhain format
       const amountInBigNumber = ethers.utils.parseUnits(amountin + '', digitsIn);
       const minAmountOutBigNumber = ethers.utils.parseUnits(minamountout + '', digitsOut);
       const minLiquidityInBigNumber = ethers.utils.parseUnits(minliquidityin + '', digitsIn);
-      prettyPrint('Derived values', {
-        tokenIn: tokenIn,
-        tokenOut: tokenOut,
-        amountInBigNumber: amountInBigNumber,
-        minAmountOutBigNumber: minAmountOutBigNumber,
-        minLiquidityInBigNumber: minLiquidityInBigNumber,
-      });
+      prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber, minLiquidityInBigNumber}); // prettier-ignore
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
@@ -94,12 +89,10 @@ task(
         return false;
       }
       // Get initial nonce
+      let nonce: number;
       if (fastnonce) {
         nonce = await signer.getTransactionCount();
-        prettyPrint('Initial nonce', {
-          nonce,
-          msg: 'Do not make transactions while the script is running!',
-        });
+        prettyPrint('Initial nonce set', { nonce });
       }
       // Function that will be called after each liquidity add event
       const mintCallback = async (
@@ -127,10 +120,18 @@ task(
           return false;
         }
         // Optionally, compute nonce & gas manually
-        const swapOverrides: Overrides = {};
-        if (fastnonce) {
-          swapOverrides.nonce = nonce;
-          prettyPrint('Sending swap...', { nonce });
+        const swapOverrides: Overrides = {
+          nonce: fastnonce ? nonce : undefined,
+          gasLimit: gasLimit || undefined,
+          maxFeePerGas: maxFeePerGas
+            ? ethers.utils.parseUnits(maxFeePerGas + '', 'gwei')
+            : undefined,
+          maxPriorityFeePerGas: maxPriorityFeePerGas
+            ? ethers.utils.parseUnits(maxPriorityFeePerGas + '', 'gwei')
+            : undefined,
+        };
+        if (swapOverrides) {
+          prettyPrint('Overrides', swapOverrides);
         }
         // Swap
         const router = dex.getRouterSigner();

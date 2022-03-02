@@ -40,47 +40,20 @@ task(
       hre
     ) => {
       prettyPrint('Arguments', args);
-      const {
-        dexName,
-        pair,
-        token0,
-        token1,
-        digits0,
-        digits1,
-        itokenin,
-        to,
-        amountin,
-        minamountout,
-        deadline,
-        dryrun,
-      } = args;
+      const {dexName,  pair,  token0,  token1,  digits0,  digits1,  itokenin,  to,  amountin,  minamountout,  deadline,  dryrun} = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
-      switch (itokenin) {
-        case 0:
-          tokenIn = token0;
-          tokenOut = token1;
-          digitsIn = digits0;
-          digitsOut = digits1;
-          break;
-        case 1:
-          tokenIn = token1;
-          tokenOut = token0;
-          digitsIn = digits1;
-          digitsOut = digits0;
-          break;
-        default:
-          throw new Error(`Parameter itokenin must be either 0 or 1, given '${itokenin}'`);
+      if (itokenin === 0) {
+        (tokenIn = token0), (tokenOut = token1), (digitsIn = digits0), (digitsOut = digits1);
+      } else if (itokenin === 1) {
+        (tokenIn = token1), (tokenOut = token0), (digitsIn = digits1), (digitsOut = digits0);
+      } else {
+        throw new Error(`Parameter itokenin must be either 0 or 1, given '${itokenin}'`);
       }
       // Get the amounts in blockchhain format
       const amountInBigNumber = ethers.utils.parseUnits(amountin + '', digitsIn);
       const minAmountOutBigNumber = ethers.utils.parseUnits(minamountout + '', digitsOut);
-      prettyPrint('Derived values', {
-        tokenIn: tokenIn,
-        tokenOut: tokenOut,
-        amountInBigNumber: amountInBigNumber,
-        minAmountOutBigNumber: minAmountOutBigNumber,
-      });
+      prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber}); // prettier-ignore
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
