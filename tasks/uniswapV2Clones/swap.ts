@@ -16,10 +16,10 @@ task(
   .addParam('digits0', 'Digits of 1st token in pair', undefined, types.int)
   .addParam('digits1', 'Digits of 2nd token in pair', undefined, types.int)
   .addParam('itokenin', 'Index of token to sell (0 or 1)', undefined, types.int)
-  .addParam('to', 'Recipient of the swap output tokens')
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
   .addParam('deadline', 'How many seconds should we try swapping', undefined, types.float)
+  .addOptionalParam('to', 'Recipient of the swap output tokens')
   .addOptionalParam('dryrun', 'Stop right before the actual swap', true, types.boolean)
   .setAction(
     async (
@@ -31,16 +31,16 @@ task(
         digits0: number;
         digits1: number;
         itokenin: 0 | 1;
-        to: string;
         amountin: number;
         minamountout: number;
         deadline: number;
+        to: string;
         dryrun: boolean;
       },
       hre
     ) => {
       prettyPrint('Arguments', args);
-      const {dexName,  pair,  token0,  token1,  digits0,  digits1,  itokenin,  to,  amountin,  minamountout,  deadline,  dryrun} = args; // prettier-ignore
+      const {dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, deadline, to, dryrun} = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
       if (itokenin === 0) {
@@ -76,13 +76,13 @@ task(
         amountInBigNumber,
         minAmountOutBigNumber,
         [tokenIn, tokenOut],
-        to,
+        to || (await signer.getAddress()),
         Date.now() + 1000 * 60 * deadline
         // {
         //   // nonce: 1029,
         //   gasLimit: 400000,
-        //   maxFeePerGas: ethers.utils.parseUnits("100", "gwei"),
-        //   maxPriorityFeePerGas: ethers.utils.parseUnits("10", "gwei"),
+        //   maxFeePerGas: ethers.utils.parseUnits('200', 'gwei'),
+        //   maxPriorityFeePerGas: ethers.utils.parseUnits('10', 'gwei'),
         // }
       );
       const swapTxReceipt = await swapTx.wait();

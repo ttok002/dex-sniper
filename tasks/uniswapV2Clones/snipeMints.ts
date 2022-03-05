@@ -18,9 +18,9 @@ task(
   .addParam('digits0', 'Digits of 1st token in pair', undefined, types.int)
   .addParam('digits1', 'Digits of 2nd token in pair', undefined, types.int)
   .addParam('itokenin', 'Index of token to sell (0 or 1)', undefined, types.int)
-  .addParam('to', 'Recipient of the swap output tokens')
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
+  .addOptionalParam('to', 'Recipient of the swap output tokens')
   .addOptionalParam('gasLimit', 'Maximum gas to use', 0, types.int)
   .addOptionalParam('maxFeePerGas', 'Max gwei to pay per unit of gas', 0.0, types.float)
   .addOptionalParam('maxPriorityFeePerGas', 'Max gwei for the miner tip', 0.0, types.float)
@@ -49,10 +49,10 @@ task(
         digits0: number;
         digits1: number;
         itokenin: 0 | 1;
-        to: string;
         amountin: number;
         minamountout: number;
         fastnonce: boolean;
+        to: string;
         gasLimit: number;
         maxFeePerGas: number;
         maxPriorityFeePerGas: number;
@@ -65,7 +65,7 @@ task(
     ) => {
       prettyPrint('Arguments', args);
       // Given parameters
-      const { dexName, pair, token0, token1, digits0, digits1, itokenin, to, amountin, minamountout, fastnonce, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
+      const { dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, fastnonce, to, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
       if (itokenin === 0) {
@@ -139,7 +139,7 @@ task(
           amountInBigNumber,
           minAmountOutBigNumber,
           [tokenIn, tokenOut],
-          to,
+          to || (await signer.getAddress()),
           Date.now() + 1000 * 60 * deadline,
           swapOverrides
         );
