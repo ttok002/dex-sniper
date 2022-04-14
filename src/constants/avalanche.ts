@@ -1,4 +1,4 @@
-import { Pair, Token } from './types';
+import { Pair, Token, Contract } from './types';
 
 export const ERC20: Record<string, Token> = {
   USDCE: {
@@ -67,6 +67,14 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
     address: '0xbdc7ef37283bc67d50886c4afb64877e3e83f869',
     token0: ERC20.YETI,
     token1: ERC20.WAVAX,
+    creationTx: '0x555d3095f14890df8bc8a80d138a50bce97637e9843a43d2f0f01ce433943652',
     creationBlock: 13380038,
+  },
+};
+
+export const CONTRACTS: Record<string, Contract> = {
+  TRADERJOE_ROUTER_V2: {
+    label: 'TraderJoe Router V2 - JoeRouter02',
+    address: '0x60ae616a2155ee3d9a68541ba4544862310933d4',
   },
 };

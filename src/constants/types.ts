@@ -9,7 +9,13 @@ export interface Pair {
   address: string;
   token0: Token;
   token1: Token;
+  creationTx?: string;
   creationBlock?: number;
   firstSwapBlock?: number;
   firstMintBlock?: number;
+}
+
+export interface Contract {
+  label: string;
+  address: string;
 }

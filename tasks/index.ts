@@ -26,8 +26,10 @@ import './uniswapV2Clones/swap';
 // DEX utilities
 import './uniswapV2Clones/getPairAddress';
 import './uniswapV2Clones/getAmountsOut';
+import './uniswapV2Clones/getReserves';
 
 // Generic utilities
+import './utils/approveTokenSpending';
 import './utils/getTimeFromBlock';
 import './utils/getBlockFromTime';
 import './utils/getLatestBlock';
