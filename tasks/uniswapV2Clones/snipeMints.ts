@@ -94,6 +94,7 @@ task(
         nonce = await signer.getTransactionCount();
         prettyPrint('Initial nonce set', { nonce });
       }
+
       // Function that will be called after each liquidity add event
       const mintCallback = async (
         mintSender: string,
@@ -133,23 +134,30 @@ task(
         if (swapOverrides) {
           prettyPrint('Overrides', swapOverrides);
         }
-        // Swap
+        // Swap.
+        // We wrap the swap in a try-catch statement
+        // to avoid exiting if a transaction fails
         const router = dex.getRouterSigner();
-        const swapTx = await router.swapExactTokensForTokens(
-          amountInBigNumber,
-          minAmountOutBigNumber,
-          [tokenIn, tokenOut],
-          to || (await signer.getAddress()),
-          Date.now() + 1000 * 60 * deadline,
-          swapOverrides
-        );
-        // Increment nonce
-        if (fastnonce) {
-          nonce += 1;
+        try {
+          const swapTx = await router.swapExactTokensForTokens(
+            amountInBigNumber,
+            minAmountOutBigNumber,
+            [tokenIn, tokenOut],
+            to || (await signer.getAddress()),
+            Date.now() + 1000 * 60 * deadline,
+            swapOverrides
+          );
+          // Increment nonce
+          if (fastnonce) {
+            nonce += 1;
+          }
+          const swapTxReceipt = await swapTx.wait();
+          printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
+        } catch (error) {
+          prettyPrint('Caught exception', { msg: (error as Error).message });
         }
-        const swapTxReceipt = await swapTx.wait();
-        printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
       };
+
       // Start listening for add liquidity events
       if (runonce) {
         dex.listenToMintOnce(pair, mintCallback);
