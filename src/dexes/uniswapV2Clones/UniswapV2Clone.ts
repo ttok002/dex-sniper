@@ -125,6 +125,16 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
+   * Return the reserves in the pool.
+   *
+   * Docs: https://docs.uniswap.org/protocol/V2/reference/smart-contracts/pair#getreserves
+   */
+  async getReserves(pair: string): Promise<number[]> {
+    const pool = this.getPair(pair);
+    return await pool.getReserves();
+  }
+
+  /**
    * Return the transaction that created the pair consisting of
    * the given tokens.
    *

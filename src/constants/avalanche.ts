@@ -26,6 +26,11 @@ export const ERC20: Record<string, Token> = {
     address: '0x3EeFb18003D033661f84e48360eBeCD181A84709',
     digits: 18,
   },
+  YETI: {
+    label: 'YETI',
+    address: '0x77777777777d4554c39223c354a05825b2e8faa3',
+    digits: 18,
+  },
 };
 
 export const PAIRS_TRADERJOE: Record<string, Pair> = {
@@ -56,5 +61,12 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
     token0: ERC20.ISA,
     token1: ERC20.WAVAX,
     creationBlock: 9228111,
+  },
+  YETI_WAVAX: {
+    label: 'YETI-WAVAX',
+    address: '0xbdc7ef37283bc67d50886c4afb64877e3e83f869',
+    token0: ERC20.YETI,
+    token1: ERC20.WAVAX,
+    creationBlock: 13380038,
   },
 };
