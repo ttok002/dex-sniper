@@ -21,7 +21,12 @@ task(
   .addParam('amountin', 'How much you are willing to spend', undefined, types.float)
   .addParam('minamountout', 'Minimum amout of tokens you will receive', undefined, types.float)
   .addOptionalParam('to', 'Recipient of the swap output tokens')
-  .addOptionalParam('gasLimit', 'Maximum gas to use', 0, types.int)
+  .addOptionalParam(
+    'gasLimit',
+    'Maximum gas to use. If not given, or zero, the bot will use eth_estimateGas, with a beneficial side effect: it checks whether the tx would fail, without actually sending it (https://ethereum.stackexchange.com/a/770/89782).',
+    0,
+    types.int
+  )
   .addOptionalParam('maxFeePerGas', 'Max gwei to pay per unit of gas', 0.0, types.float)
   .addOptionalParam('maxPriorityFeePerGas', 'Max gwei for the miner tip', 0.0, types.float)
   .addOptionalParam(
@@ -63,9 +68,10 @@ task(
       },
       hre
     ) => {
+      // Parse parameters
       prettyPrint('Arguments', args);
-      // Given parameters
       const { dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, fastnonce, to, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
+
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
       if (itokenin === 0) {
@@ -75,19 +81,23 @@ task(
       } else {
         throw new Error(`Parameter itokenin must be either 0 or 1, given '${itokenin}'`);
       }
+
       // Get the amounts in blockchhain format
       const amountInBigNumber = ethers.utils.parseUnits(amountin + '', digitsIn);
       const minAmountOutBigNumber = ethers.utils.parseUnits(minamountout + '', digitsOut);
       const minLiquidityInBigNumber = ethers.utils.parseUnits(minliquidityin + '', digitsIn);
       prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber, minLiquidityInBigNumber}); // prettier-ignore
+
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
       const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name, signer);
+
       // Check that the given pair corresponds to the tokens
       if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
         return false;
       }
+
       // Get initial nonce
       let nonce: number;
       if (fastnonce) {

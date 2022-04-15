@@ -1,3 +1,4 @@
+import { prettyPrint } from '../../../helpers/print';
 import { UniswapV2Clone } from '../UniswapV2Clone';
 
 /**
@@ -16,12 +17,7 @@ export async function validatePair(
   const expectedPair = await dex.getPairAddress(token0, token1, false);
   if (expectedPair !== pair.toLowerCase()) {
     if (doEcho) {
-      console.log(`
-        Wrong pair!
-        ==============
-        given pair: ${pair}
-        expected: ${expectedPair}
-      `);
+      prettyPrint('Wrong pair!', { given: pair, expected: expectedPair });
     }
     return false;
   }
