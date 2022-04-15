@@ -3,7 +3,7 @@ import { task, types } from 'hardhat/config';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
 import { wait } from '../../src/helpers/general';
 import { validatePair } from '../../src/dexes/uniswapV2Clones/helpers/validation';
-import { getProvider, getSigner } from '../../src/helpers/providers';
+import { getSigner, startConnection } from '../../src/helpers/providers';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { prettyPrint, printMintEvent, printSwapReceipt } from '../../src/helpers/print';
 
@@ -88,92 +88,94 @@ task(
       const minLiquidityInBigNumber = ethers.utils.parseUnits(minliquidityin + '', digitsIn);
       prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber, minLiquidityInBigNumber}); // prettier-ignore
 
-      // Load credentials and get dex object
-      const provider = getProvider(hre);
-      const signer = getSigner(hre, provider);
-      const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name, signer);
+      // Start the WebSocket connection
+      startConnection(hre, async (hre, provider) => {
+        // Load credentials and get dex object
+        const signer = getSigner(hre, provider);
+        const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name, signer);
 
-      // Check that the given pair corresponds to the tokens
-      if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
-        return false;
-      }
-
-      // Get initial nonce
-      let nonce: number;
-      if (fastnonce) {
-        nonce = await signer.getTransactionCount();
-        prettyPrint('Initial nonce set', { nonce });
-      }
-
-      // Function that will be called after each liquidity add event
-      const mintCallback = async (
-        mintSender: string,
-        mintAmount0: BigNumber,
-        mintAmount1: BigNumber,
-        mintTxReceipt: TransactionReceipt
-      ) => {
-        // Print mint event
-        printMintEvent(mintSender, mintAmount0, mintAmount1, mintTxReceipt, digits0, digits1);
-        // Compute price and minimum amount of tokenOut
-        const liquidityInBigNumber = itokenin === 0 ? mintAmount0 : mintAmount1;
-        // Exit if the liquidity added is too small
-        if (minliquidityin && minLiquidityInBigNumber.gt(liquidityInBigNumber)) {
-          prettyPrint('Small liquidity!', {
-            msg: 'Exiting because liquidity add in token${itokenin} was too small',
-            liquidityIn: `${ethers.utils.formatUnits(liquidityInBigNumber, digitsIn)}`,
-            minLiquidityIn: minliquidityin,
-          });
-          return;
-        }
-        // Exit if we are simulating
-        if (dryrun) {
-          prettyPrint('Dry run', { msg: 'Exiting...' });
+        // Check that the given pair corresponds to the tokens
+        if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
           return false;
         }
-        // Optionally, compute nonce & gas manually
-        const swapOverrides: Overrides = {
-          nonce: fastnonce ? nonce : undefined,
-          gasLimit: gasLimit || undefined,
-          maxFeePerGas: maxFeePerGas
-            ? ethers.utils.parseUnits(maxFeePerGas + '', 'gwei')
-            : undefined,
-          maxPriorityFeePerGas: maxPriorityFeePerGas
-            ? ethers.utils.parseUnits(maxPriorityFeePerGas + '', 'gwei')
-            : undefined,
-        };
-        if (swapOverrides) {
-          prettyPrint('Overrides', swapOverrides);
-        }
-        // Swap.
-        // We wrap the swap in a try-catch statement
-        // to avoid exiting if a transaction fails
-        const router = dex.getRouterSigner();
-        try {
-          const swapTx = await router.swapExactTokensForTokens(
-            amountInBigNumber,
-            minAmountOutBigNumber,
-            [tokenIn, tokenOut],
-            to || (await signer.getAddress()),
-            Date.now() + 1000 * 60 * deadline,
-            swapOverrides
-          );
-          // Increment nonce
-          if (fastnonce) {
-            nonce += 1;
-          }
-          const swapTxReceipt = await swapTx.wait();
-          printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
-        } catch (error) {
-          prettyPrint('Caught exception', { msg: (error as Error).message });
-        }
-      };
 
-      // Start listening for add liquidity events
-      if (runonce) {
-        dex.listenToMintOnce(pair, mintCallback);
-      } else {
-        dex.listenToMint(pair, mintCallback);
-      }
+        // Get initial nonce
+        let nonce: number;
+        if (fastnonce) {
+          nonce = await signer.getTransactionCount();
+          prettyPrint('Initial nonce set', { nonce });
+        }
+
+        // Function that will be called after each liquidity add event
+        const mintCallback = async (
+          mintSender: string,
+          mintAmount0: BigNumber,
+          mintAmount1: BigNumber,
+          mintTxReceipt: TransactionReceipt
+        ) => {
+          // Print mint event
+          printMintEvent(mintSender, mintAmount0, mintAmount1, mintTxReceipt, digits0, digits1);
+          // Compute price and minimum amount of tokenOut
+          const liquidityInBigNumber = itokenin === 0 ? mintAmount0 : mintAmount1;
+          // Exit if the liquidity added is too small
+          if (minliquidityin && minLiquidityInBigNumber.gt(liquidityInBigNumber)) {
+            prettyPrint('Small liquidity!', {
+              msg: 'Exiting because liquidity add in token${itokenin} was too small',
+              liquidityIn: `${ethers.utils.formatUnits(liquidityInBigNumber, digitsIn)}`,
+              minLiquidityIn: minliquidityin,
+            });
+            return;
+          }
+          // Exit if we are simulating
+          if (dryrun) {
+            prettyPrint('Dry run', { msg: 'Exiting...' });
+            return false;
+          }
+          // Optionally, compute nonce & gas manually
+          const swapOverrides: Overrides = {
+            nonce: fastnonce ? nonce : undefined,
+            gasLimit: gasLimit || undefined,
+            maxFeePerGas: maxFeePerGas
+              ? ethers.utils.parseUnits(maxFeePerGas + '', 'gwei')
+              : undefined,
+            maxPriorityFeePerGas: maxPriorityFeePerGas
+              ? ethers.utils.parseUnits(maxPriorityFeePerGas + '', 'gwei')
+              : undefined,
+          };
+          if (swapOverrides) {
+            prettyPrint('Overrides', swapOverrides);
+          }
+          // Swap.
+          // We wrap the swap in a try-catch statement
+          // to avoid exiting if a transaction fails
+          const router = dex.getRouterSigner();
+          try {
+            const swapTx = await router.swapExactTokensForTokens(
+              amountInBigNumber,
+              minAmountOutBigNumber,
+              [tokenIn, tokenOut],
+              to || (await signer.getAddress()),
+              Date.now() + 1000 * 60 * deadline,
+              swapOverrides
+            );
+            // Increment nonce
+            if (fastnonce) {
+              nonce += 1;
+            }
+            const swapTxReceipt = await swapTx.wait();
+            printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
+          } catch (error) {
+            prettyPrint('Caught exception', { msg: (error as Error).message });
+          }
+        };
+
+        // Start listening for add liquidity events
+        if (runonce) {
+          dex.listenToMintOnce(pair, mintCallback);
+        } else {
+          dex.listenToMint(pair, mintCallback);
+        }
+      }); // end startConnection
       return wait();
     }
   );

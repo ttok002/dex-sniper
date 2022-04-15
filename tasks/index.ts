@@ -6,6 +6,7 @@
 // Listen
 import './uniswapV2Clones/listenToSwaps';
 import './uniswapV2Clones/listenToMints';
+import './uniswapV2Clones/listenToMintsKeepalive';
 import './uniswapV2Clones/listenToBurns';
 import './uniswapV2Clones/listenToPairCreated';
 
