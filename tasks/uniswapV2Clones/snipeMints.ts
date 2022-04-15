@@ -157,12 +157,12 @@ task(
               to || (await signer.getAddress()),
               Date.now() + 1000 * 60 * deadline,
               swapOverrides
-            );
+            ); // will throw if gasEstimate gives error
             // Increment nonce
             if (fastnonce) {
               nonce += 1;
             }
-            const swapTxReceipt = await swapTx.wait();
+            const swapTxReceipt = await swapTx.wait(); // will throw if tx has error
             printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
           } catch (error) {
             prettyPrint('Caught exception', { msg: (error as Error).message });

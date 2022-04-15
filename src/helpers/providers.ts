@@ -92,7 +92,7 @@ export function startConnection(
 
   provider._websocket.on('open', () => {
     keepAliveInterval = setInterval(() => {
-      logger.debug('Checking if the connection is alive, sending a ping');
+      logger.debug('> Checking if the connection is alive, sending a ping');
       provider._websocket.ping();
       // Delay should be equal to the interval at which your server
       // sends out pings plus a conservative assumption of the latency.
@@ -105,14 +105,14 @@ export function startConnection(
   });
 
   provider._websocket.on('close', () => {
-    logger.warn('The websocket connection was closed');
+    logger.warn('> WARNING: The websocket connection was closed');
     clearInterval(keepAliveInterval);
     clearTimeout(pingTimeout);
     startConnection(hre, onOpen);
   });
 
   provider._websocket.on('pong', () => {
-    logger.debug('Received pong, so connection is alive, clearing the timeout');
+    logger.debug('> Received pong, so connection is alive, clearing the timeout');
     clearInterval(pingTimeout);
   });
 }

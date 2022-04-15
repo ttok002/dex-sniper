@@ -1,13 +1,14 @@
+import { LogLevel } from '@ethersproject/logger';
 import { ethers } from 'ethers';
 import { getenv } from './dotenv';
 
-export const LOGGING = parseInt(getenv('LOGGING', '0'), 10);
+export const LOGGING = getenv('LOGGING', 'OFF') as LogLevel;
 export const LOG_REQUESTS = parseInt(getenv('LOG_REQUESTS', '0'), 10);
 export const LOG_RESPONSES = parseInt(getenv('LOG_RESPONSES', '0'), 10);
 
 const Logger = ethers.utils.Logger;
 
-Logger.setLogLevel(LOGGING ? Logger.levels.DEBUG : Logger.levels.OFF);
+Logger.setLogLevel(LOGGING ? LOGGING : Logger.levels.OFF);
 
 export const logger = new ethers.utils.Logger('v1.0');
 
