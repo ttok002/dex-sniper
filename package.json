@@ -55,5 +55,8 @@
     "ts-node": "^10.5.0",
     "typechain": "^5.2.0",
     "typescript": "^4.5.5"
+  },
+  "dependencies": {
+    "web3-providers-ws": "^1.7.3"
   }
 }
