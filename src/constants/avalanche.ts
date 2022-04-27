@@ -31,6 +31,11 @@ export const ERC20: Record<string, Token> = {
     address: '0x77777777777d4554c39223c354a05825b2e8faa3',
     digits: 18,
   },
+  DBY: {
+    label: 'DBY MetaDerby',
+    address: '0x5085434227ab73151fad2de546210cbc8663df96',
+    digits: 18,
+  },
 };
 
 export const PAIRS_TRADERJOE: Record<string, Pair> = {
@@ -69,6 +74,14 @@ export const PAIRS_TRADERJOE: Record<string, Pair> = {
     token1: ERC20.WAVAX,
     creationTx: '0x555d3095f14890df8bc8a80d138a50bce97637e9843a43d2f0f01ce433943652',
     creationBlock: 13380038,
+  },
+  DBY_WAVAX: {
+    label: 'DBY-WAVAX',
+    address: '0x30556acc64b7b8f37ae4ce8325dd279847f09926',
+    token0: ERC20.DBY,
+    token1: ERC20.WAVAX,
+    creationTx: '0x3a0c2f0e9108f4c64238ccb876cd544b5f1b86331a890c393b06e32631063d2c',
+    creationBlock: 13884684,
   },
 };
 
