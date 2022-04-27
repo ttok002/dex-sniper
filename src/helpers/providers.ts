@@ -5,6 +5,7 @@ import { URL } from 'url';
 import { logger, LOGGING, onProviderDebug } from '../common/logger';
 import Web3WsProvider from 'web3-providers-ws';
 import { WebSocketProvider } from '@ethersproject/providers';
+import { getenv } from '../common/dotenv';
 
 /**
  * Return either an HTTP Provider or a WebSocket provider
@@ -26,7 +27,11 @@ export function getProvider(
   switch (url.protocol) {
     case 'http:':
     case 'https:':
-      provider = new ethers.providers.JsonRpcProvider(url.href);
+      provider = new ethers.providers.JsonRpcProvider({
+        url: url.href,
+        user: getenv('BASICAUTH_USER'),
+        password: getenv('BASICAUTH_PASSWORD'),
+      });
       break;
     case 'wss:':
       if (useWeb3WsProvider) {
