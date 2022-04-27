@@ -35,3 +35,4 @@ import './utils/getTimeFromBlock';
 import './utils/getBlockFromTime';
 import './utils/getLatestBlock';
 import './utils/getNonce';
+import './utils/streamPendingTxs';
