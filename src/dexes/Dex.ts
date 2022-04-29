@@ -7,10 +7,10 @@ import { Signer } from 'ethers';
  */
 export abstract class Dex {
   /**
-   * The DEX object must contains the provider used to
+   * The DEX object must contain the provider used to
    * read the contracts
    */
-  provider?: Provider;
+  provider: Provider;
 
   /**
    * If the DEX object contains a signer it will be able
@@ -24,7 +24,7 @@ export abstract class Dex {
    */
   abstract supportedNetworks: string[];
 
-  constructor(provider?: Provider, signer?: Signer) {
+  constructor(provider: Provider, signer?: Signer) {
     this.provider = provider;
     this.signer = signer;
   }
