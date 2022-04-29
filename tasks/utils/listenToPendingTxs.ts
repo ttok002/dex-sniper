@@ -5,7 +5,7 @@ import { getProvider } from '../../src/helpers/providers';
 
 task(
   'utils:listenToPendingTxs',
-  'Stream all pending transactions as they arrive to the node; best used with a WS connection on a full/validator node'
+  'Stream all pending transactions as they arrive to the node; use with a WS connection and a validator node'
 ).setAction(async ({}, hre) => {
   const provider = getProvider(hre) as WebSocketProvider;
   provider.on('pending', (tx) => {
