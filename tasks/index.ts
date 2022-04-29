@@ -35,4 +35,8 @@ import './utils/getTimeFromBlock';
 import './utils/getBlockFromTime';
 import './utils/getLatestBlock';
 import './utils/getNonce';
-import './utils/streamPendingTxs';
+import './utils/listenToPendingTxs';
+
+// Time
+import './time/timeGetProvider';
+import './time/timeGetLatestBlock';
