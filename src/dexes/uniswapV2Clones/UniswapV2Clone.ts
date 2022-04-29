@@ -1,12 +1,14 @@
-import { Contract, ethers, Event, constants, BigNumber } from 'ethers';
+import { Contract, ethers, Event, constants, BigNumber, logger } from 'ethers';
 import { Dex } from '../Dex';
 import {
+  AddLiquidityMethodCallback,
   BurnEventCallback,
   MintEventCallback,
   PairCreatedEventCallback,
   SwapEventCallback,
 } from '../types';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
+import { isResponseFrom, isResponseTo } from '../../helpers/transactions';
 
 export abstract class UniswapV2Clone extends Dex {
   abstract routerAddress: string;
@@ -64,11 +66,48 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
-   * Fire the given callback everytime a Swap is made
-   * on the given pair
+   * Fire the given callback every time a Swap event is
+   * emitted for the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
     this.getPair(pair).on('Swap', callback);
+  }
+
+  /**
+   * Fire the given callback every time an addLiquidity transaction
+   * directed at the router enters the mempool.
+   *
+   * Optionally filter the transactions by the 'from'
+   * address.
+   *
+   * TODO: Support both addLiquidity and addLiquidityAVAX
+   */
+  listenToPendingAddLiquidity(
+    callback: AddLiquidityMethodCallback,
+    from: string | null = null,
+    routerAddress: string = this.routerAddress
+  ): void {
+    // Listen to all pending transactions
+    this.provider.on('pending', async (txHash: string) => {
+      const res = await this.provider.getTransaction(txHash);
+      // Pick only txs to the router
+      if (!isResponseTo(res, routerAddress)) {
+        return;
+      }
+      // Optionally filter by sender
+      if (from && !isResponseFrom(res, from)) {
+        return;
+      }
+      // Parse transaction
+      const parsedTx = this.getRouter().interface.parseTransaction(res);
+      // Return if the transaction is not an addLiquidity
+      if (parsedTx.functionFragment.name !== 'addLiquidity') {
+        return;
+      }
+      logger.info('>>> ARGS');
+      logger.info(parsedTx.args);
+      // callback();
+    });
   }
 
   /**

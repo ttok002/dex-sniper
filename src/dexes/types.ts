@@ -2,6 +2,23 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 
 /**
+ * The signature of the addLiquidity method
+ * in the V2 router
+ */
+export interface AddLiquidityMethodCallback {
+  (
+    tokenA: string,
+    tokenB: string,
+    amountADesired: number,
+    amountBDesired: number,
+    amountAMin: number,
+    amountBMin: number,
+    to: string,
+    deadline: number
+  ): void;
+}
+
+/**
  * The callback of a Swap event on the pair
  */
 export interface SwapEventCallback {

@@ -15,6 +15,7 @@ import './uniswapV2Clones/listenToMints';
 import './uniswapV2Clones/listenToMintsKeepalive';
 import './uniswapV2Clones/listenToBurns';
 import './uniswapV2Clones/listenToPairCreated';
+import './uniswapV2Clones/listenToPendingAddLiquidity';
 
 // Dex history
 import './uniswapV2Clones/getRecentSwaps';
