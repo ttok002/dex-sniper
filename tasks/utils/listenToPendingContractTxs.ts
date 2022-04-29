@@ -1,6 +1,7 @@
 import { task } from 'hardhat/config';
 import { wait } from '../../src/helpers/general';
 import { getProvider } from '../../src/helpers/providers';
+import { isResponseFrom, isResponseTo } from '../../src/helpers/transactions';
 
 task(
   'utils:listenToPendingContractTxs',
@@ -11,12 +12,16 @@ task(
   .setAction(async ({ contractAddress, from }, hre) => {
     const provider = getProvider(hre);
     provider.on('pending', async (txHash) => {
-      const tx = await provider.getTransaction(txHash);
-      if (tx['to']?.toLowerCase() === contractAddress.toLowerCase()) {
-        if (!from || tx.from.toLowerCase() === from.toLowerCase()) {
-          console.log(tx);
-        }
+      const res = await provider.getTransaction(txHash);
+      // Pick only txs to the contract
+      if (!isResponseTo(res, contractAddress)) {
+        return;
       }
+      // Optionally filter by sender
+      if (from && !isResponseFrom(res, from)) {
+        return;
+      }
+      console.log(res);
     });
     return wait();
   });
