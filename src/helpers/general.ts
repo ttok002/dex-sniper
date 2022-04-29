@@ -40,3 +40,11 @@ export function wait(nMilliseconds: number = 0) {
     return new Promise((resolve) => setTimeout(resolve, nMilliseconds));
   }
 }
+
+/**
+ * Remove potential username and password from an URL
+ */
+export function getSafeUrl(url: string | URL) {
+  const u = new URL(url);
+  return `${u.origin}/${u.pathname}`;
+}

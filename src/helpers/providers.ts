@@ -5,6 +5,7 @@ import { URL } from 'url';
 import { logger, LOGGING, onProviderDebug } from '../common/logger';
 import { WebSocketProvider } from '@ethersproject/providers';
 import { getenv } from '../common/dotenv';
+import { getSafeUrl } from './general';
 
 /**
  * Return either an HTTP Provider or a WebSocket provider
@@ -12,7 +13,7 @@ import { getenv } from '../common/dotenv';
  */
 export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Provider {
   const url = new URL((network as any).config.url);
-  logger.debug(`> Node: ${url}`);
+  logger.debug(`> Node: ${getSafeUrl(url)}`);
   let provider: Provider;
   switch (url.protocol) {
     case 'http:':
