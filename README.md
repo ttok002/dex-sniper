@@ -20,3 +20,11 @@ Print the swaps on the TraderJoe USDC.e-WAVAX pair as they happen:
 ```bash
 npx hardhat uniswapV2Clone:listenToSwaps TraderJoe 0xa389f9430876455c36478deea9769b7ca4e3ddb1  --network avalanche
 ```
+
+You can add a `--from` parameter to restrict to a specific interacting address.
+
+### - Listen to pending txs
+
+```bash
+npx hardhat utils:listenToPendingTxs --from <wallet address> --network avalanche
+```
