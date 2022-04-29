@@ -35,6 +35,7 @@ import './utils/getLatestBlock';
 import './utils/getNonce';
 import './utils/listenToPendingTxs';
 import './utils/listenToPendingContractTxs';
+import './utils/sendEth';
 
 // Timings
 import './time/timeGetProvider';
