@@ -10,4 +10,13 @@ Snipe liquidity on popular decentralized exchanges.
 1. Copy _.env.example_ in _.env._.
 1. Configure _.env_.
 1. Run `npx hardhat` to see the available commands.
-1. Run a command, for example `npx hardhat uniswapV2:listenToSwap`,
+
+# Examples
+
+### - Listen to swaps
+
+Print the swaps on the TraderJoe USDC.e-WAVAX pair as they happen:
+
+```bash
+npx hardhat uniswapV2Clone:listenToSwaps TraderJoe 0xa389f9430876455c36478deea9769b7ca4e3ddb1  --network avalanche
+```
