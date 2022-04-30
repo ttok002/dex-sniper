@@ -15,6 +15,11 @@ const config: HardhatUserConfig = {
       accounts: getenv('AVALANCHE_PRIVATE_KEY') ? [getenv('AVALANCHE_PRIVATE_KEY')] : [],
       chainId: 43114,
     },
+    avalancheValidator: {
+      url: getenv('AVALANCHE_VALIDATOR_URL'),
+      accounts: getenv('AVALANCHE_PRIVATE_KEY') ? [getenv('AVALANCHE_PRIVATE_KEY')] : [],
+      chainId: 43114,
+    },
     ethereum: {
       url: getenv('ETHEREUM_URL'),
       accounts: getenv('ETHEREUM_PRIVATE_KEY') ? [getenv('ETHEREUM_PRIVATE_KEY')] : [],
