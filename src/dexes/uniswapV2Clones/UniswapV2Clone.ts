@@ -17,6 +17,12 @@ export abstract class UniswapV2Clone extends Dex {
   pairAbi = require('./abi/uniswapV2/pair.json');
   factoryAbi = require('./abi/uniswapV2/factory.json');
 
+  /*
+   * =====================
+   *        Getters
+   * =====================
+   */
+
   /**
    * Return the router contract
    */
@@ -66,48 +72,26 @@ export abstract class UniswapV2Clone extends Dex {
   }
 
   /**
+   * Throw an error if the dex cannot sign transactions
+   */
+  validateSigner() {
+    if (!this.signer) {
+      throw new Error('Signer not found!');
+    }
+  }
+
+  /*
+   * =====================
+   *       Listeners
+   * =====================
+   */
+
+  /**
    * Fire the given callback every time a Swap event is
    * emitted for the given pair
    */
   listenToSwap(pair: string, callback: SwapEventCallback): void {
     this.getPair(pair).on('Swap', callback);
-  }
-
-  /**
-   * Fire the given callback every time an addLiquidity transaction
-   * directed at the router enters the mempool.
-   *
-   * Optionally filter the transactions by the 'from'
-   * address.
-   *
-   * TODO: Support both addLiquidity and addLiquidityAVAX
-   */
-  listenToPendingAddLiquidity(
-    callback: AddLiquidityMethodCallback,
-    from: string | null = null,
-    routerAddress: string = this.routerAddress
-  ): void {
-    // Listen to all pending transactions
-    this.provider.on('pending', async (txHash: string) => {
-      const res = await this.provider.getTransaction(txHash);
-      // Pick only txs to the router
-      if (!isResponseTo(res, routerAddress)) {
-        return;
-      }
-      // Optionally filter by sender
-      if (from && !isResponseFrom(res, from)) {
-        return;
-      }
-      // Parse transaction
-      const parsedTx = this.getRouter().interface.parseTransaction(res);
-      // Return if the transaction is not an addLiquidity
-      if (parsedTx.functionFragment.name !== 'addLiquidity') {
-        return;
-      }
-      logger.info('>>> ARGS');
-      logger.info(parsedTx.args);
-      // callback();
-    });
   }
 
   /**
@@ -142,6 +126,12 @@ export abstract class UniswapV2Clone extends Dex {
     this.getFactory().on('PairCreated', callback);
   }
 
+  /*
+   * =====================
+   *         Logs
+   * =====================
+   */
+
   /**
    * Return the list of Swap events for the given pair.
    *
@@ -161,16 +151,6 @@ export abstract class UniswapV2Clone extends Dex {
     const pool = this.getPair(pair);
     const filter = pool.filters.Mint();
     return await pool.queryFilter(filter, fromBlock, toBlock);
-  }
-
-  /**
-   * Return the reserves in the pool.
-   *
-   * Docs: https://docs.uniswap.org/protocol/V2/reference/smart-contracts/pair#getreserves
-   */
-  async getReserves(pair: string): Promise<number[]> {
-    const pool = this.getPair(pair);
-    return await pool.getReserves();
   }
 
   /**
@@ -209,6 +189,22 @@ export abstract class UniswapV2Clone extends Dex {
     return await factory.queryFilter(filter, fromBlock, toBlock);
   }
 
+  /*
+   * =====================
+   *       Utilities
+   * =====================
+   */
+
+  /**
+   * Return the reserves in the pool.
+   *
+   * Docs: https://docs.uniswap.org/protocol/V2/reference/smart-contracts/pair#getreserves
+   */
+  async getReserves(pair: string): Promise<number[]> {
+    const pool = this.getPair(pair);
+    return await pool.getReserves();
+  }
+
   /**
    * Given the addresses of two tokens, return the address
    * of the corresponding liquidity pair, if it exists.
@@ -236,12 +232,46 @@ export abstract class UniswapV2Clone extends Dex {
     return amountsOut;
   }
 
-  /**
-   * Throw an error if the dex cannot sign transactions
+  /*
+   * =====================
+   *       Mempool
+   * =====================
    */
-  validateSigner() {
-    if (!this.signer) {
-      throw new Error('Signer not found!');
-    }
+
+  /**
+   * Fire the given callback every time an addLiquidity transaction
+   * directed at the router enters the mempool.
+   *
+   * Optionally filter the transactions by the 'from'
+   * address.
+   *
+   * TODO: Support both addLiquidity and addLiquidityAVAX
+   */
+  listenToPendingAddLiquidity(
+    callback: AddLiquidityMethodCallback,
+    from: string | null = null,
+    routerAddress: string = this.routerAddress
+  ): void {
+    // Listen to all pending transactions
+    this.provider.on('pending', async (txHash: string) => {
+      const res = await this.provider.getTransaction(txHash);
+      // Pick only txs to the router
+      if (!isResponseTo(res, routerAddress)) {
+        return;
+      }
+      // Optionally filter by sender
+      if (from && !isResponseFrom(res, from)) {
+        return;
+      }
+      // Parse transaction
+      const parsedTx = this.getRouter().interface.parseTransaction(res);
+      // Return if the transaction is not an addLiquidity
+      if (parsedTx.functionFragment.name !== 'addLiquidity') {
+        return;
+      }
+      logger.info('>>> ARGS');
+      logger.info(parsedTx.args);
+      // callback();
+    });
   }
 }
