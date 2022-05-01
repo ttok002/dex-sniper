@@ -23,9 +23,22 @@ task(
     types.boolean
   )
   .setAction(async ({ from, nMax, trigger }, hre) => {
+    // Initialize timer
     const t0 = Date.now();
+    // Transaction logger
     const txTracker = new TxTracker();
+    // Counter of outbound transactions
     let n = 0;
+    // Print a summary on exit
+    process.on('SIGINT', printReport);
+    async function printReport() {
+      const loggedTxs = await txTracker.fetchReceipts(provider);
+      prettyPrint(
+        'Transactions summary',
+        loggedTxs.map((tx) => [tx.hash, `${tx.blockNumber} [${tx.tags}]`])
+      );
+      return;
+    }
     // Get signer
     const provider = getProvider(hre);
     const signer = getSigner(hre, provider);
@@ -41,13 +54,13 @@ task(
       if (!isResponsePending(txRes)) {
         return;
       }
-      txTracker.add(txRes.hash, ['in']);
+      // Increase pending transaction counter
+      n += 1;
       printTxResponse(txRes, 'Received tx!', [
         ['time', Date.now() - t0],
         ['iteration', n],
       ]);
-      // Increase pending transaction counter
-      n += 1;
+      txTracker.add(txRes.hash, ['in']);
       // Avoid falling in an unpleasant infinite loop
       if (n > nMax) {
         prettyPrint(`Won't react to ${txRes.hash.substring(0, 7)}`, [
@@ -55,6 +68,7 @@ task(
           ['iteration', n],
         ]);
         provider.removeAllListeners();
+        return;
       }
       // React immediately by sending 1 gwei
       prettyPrint(`Reacting to ${txRes.hash.substring(0, 7)}...`, [
@@ -62,19 +76,14 @@ task(
         ['iteration', n],
       ]);
       const sendTxRes = await signer.sendTransaction({ to: self, value: 1 });
-      txTracker.add(sendTxRes.hash, ['out', `triggered by ${txRes.hash.substring(0, 7)}`]);
       printTxResponse(sendTxRes, `Reaction to ${txRes.hash.substring(0, 7)}`, [
         ['time', Date.now() - t0],
         ['iteration', n],
       ]);
+      txTracker.add(sendTxRes.hash, ['out', `triggered by ${txRes.hash.substring(0, 7)}`]);
       // Wrap up!
-      if (n === nMax) {
-        // Print block numbers
-        const loggedTxs = await txTracker.fetchReceipts(provider);
-        prettyPrint(
-          'Transactions summary',
-          loggedTxs.map((tx) => [tx.hash, `${tx.blockNumber} [${tx.tags}]`])
-        );
+      if (n == nMax) {
+        await printReport();
         return;
       }
     });
@@ -82,8 +91,8 @@ task(
     if (trigger) {
       prettyPrint('Sending trigger...', [['time', Date.now() - t0]]);
       const sendTxRes = await signer.sendTransaction({ to: self, value: 1 });
+      printTxResponse(sendTxRes, 'Trigger', [['time', Date.now() - t0]]);
       txTracker.add(sendTxRes.hash, ['out', 'trigger']);
-      printTxResponse(sendTxRes, 'Trigger response', [['time', Date.now() - t0]]);
     }
     return wait();
   });
