@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { isResponseFrom, isResponseTo } from '../../helpers/transactions';
+import { TransactionDescription } from 'ethers/lib/utils';
 
 export abstract class UniswapV2Clone extends Dex {
   abstract routerAddress: string;
@@ -239,39 +240,26 @@ export abstract class UniswapV2Clone extends Dex {
    */
 
   /**
-   * Fire the given callback every time an addLiquidity transaction
+   * Fire the given callback every time a transaction
    * directed at the router enters the mempool.
    *
-   * Optionally filter the transactions by the 'from'
+   * Optionally consider only the transactions from the 'from'
    * address.
-   *
-   * TODO: Support both addLiquidity and addLiquidityAVAX
    */
-  listenToPendingAddLiquidity(
-    callback: AddLiquidityMethodCallback,
+  listenToRouterPendingTxs(
+    callback: (t: TransactionDescription) => void,
     from: string | null = null,
     routerAddress: string = this.routerAddress
   ): void {
-    // Listen to all pending transactions
     this.provider.on('pending', async (txHash: string) => {
       const res = await this.provider.getTransaction(txHash);
-      // Pick only txs to the router
       if (!isResponseTo(res, routerAddress)) {
-        return;
+        return null;
       }
-      // Optionally filter by sender
       if (from && !isResponseFrom(res, from)) {
-        return;
+        return null;
       }
-      // Parse transaction
-      const parsedTx = this.getRouter().interface.parseTransaction(res);
-      // Return if the transaction is not an addLiquidity
-      if (parsedTx.functionFragment.name !== 'addLiquidity') {
-        return;
-      }
-      logger.info('>>> ARGS');
-      logger.info(parsedTx.args);
-      // callback();
+      callback(this.getRouter().interface.parseTransaction(res));
     });
   }
 }
