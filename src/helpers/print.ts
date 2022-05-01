@@ -1,6 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
-import { ethers } from 'ethers';
+import { ethers, logger } from 'ethers';
 import { TransactionDescription } from 'ethers/lib/utils';
 
 /**
@@ -165,7 +165,7 @@ export function printParsedTx(
  * Pretty print an info message
  */
 export function prettyPrint(title: string, lines: [string, any][], nPadding: number = 4): void {
-  console.log(buildPrettyPrint(title, lines, nPadding));
+  logger.info(buildPrettyPrint(title, lines, nPadding));
 }
 
 /**
