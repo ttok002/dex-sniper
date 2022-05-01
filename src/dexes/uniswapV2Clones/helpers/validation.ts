@@ -17,7 +17,10 @@ export async function validatePair(
   const expectedPair = await dex.getPairAddress(token0, token1, false);
   if (expectedPair !== pair.toLowerCase()) {
     if (doEcho) {
-      prettyPrint('Wrong pair!', { given: pair, expected: expectedPair });
+      prettyPrint('Wrong pair!', [
+        ['given', pair],
+        ['expected', expectedPair],
+      ]);
     }
     return false;
   }

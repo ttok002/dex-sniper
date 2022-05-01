@@ -1,5 +1,5 @@
 import { task, types } from 'hardhat/config';
-import { prettyPrint, printTxReceipt } from '../../src/helpers/print';
+import { prepare, prettyPrint, printTxReceipt } from '../../src/helpers/print';
 import { getSigner } from '../../src/helpers/providers';
 
 task('utils:sendEth', 'Send some ETH to the give address')
@@ -10,7 +10,7 @@ task('utils:sendEth', 'Send some ETH to the give address')
       to: to,
       value: hre.ethers.utils.parseEther(valueInEth),
     };
-    prettyPrint('Params', params);
+    prettyPrint('Params', prepare(params));
     const txRes = await getSigner(hre).sendTransaction(params);
     const txReceipt = await txRes.wait();
     printTxReceipt(txReceipt);

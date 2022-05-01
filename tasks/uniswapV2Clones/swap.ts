@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { task, types } from 'hardhat/config';
 import { validatePair } from '../../src/dexes/uniswapV2Clones/helpers/validation';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
-import { prettyPrint, printAmounts, printSwapReceipt } from '../../src/helpers/print';
+import { prepare, prettyPrint, printAmounts, printSwapReceipt } from '../../src/helpers/print';
 import { getProvider, getSigner } from '../../src/helpers/providers';
 
 task(
@@ -39,7 +39,7 @@ task(
       },
       hre
     ) => {
-      prettyPrint('Arguments', args);
+      prettyPrint('Arguments', prepare(args));
       const {dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, deadline, to, dryrun} = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
@@ -53,7 +53,7 @@ task(
       // Get the amounts in blockchhain format
       const amountInBigNumber = ethers.utils.parseUnits(amountin + '', digitsIn);
       const minAmountOutBigNumber = ethers.utils.parseUnits(minamountout + '', digitsOut);
-      prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber}); // prettier-ignore
+      prettyPrint('Derived values', prepare({tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber})); // prettier-ignore
       // Load credentials and get dex object
       const provider = getProvider(hre);
       const signer = getSigner(hre, provider);
@@ -68,7 +68,7 @@ task(
       printAmounts(amounts, digitsIn, digitsOut);
       // Exit if we are simulating
       if (dryrun) {
-        prettyPrint('Dry run', { msg: 'Exiting...' });
+        prettyPrint('Dry run', [['msg', 'Exiting...']]);
         return false;
       }
       // Swap

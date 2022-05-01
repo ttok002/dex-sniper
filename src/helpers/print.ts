@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { ethers } from 'ethers';
+import { TransactionDescription } from 'ethers/lib/utils';
 
 /**
  * Pretty print a Swap event; suitable to
@@ -17,16 +18,16 @@ export function printSwapEvent(
   digits0: number = 18,
   digits1: number = 18
 ) {
-  prettyPrint('New swap detected', {
-    date: new Date(),
-    sender: sender,
-    amount0In: `${ethers.utils.formatUnits(amount0In, digits0)} (${amount0In})`,
-    amount1In: `${ethers.utils.formatUnits(amount1In, digits1)} (${amount1In})`,
-    amount0Out: `${ethers.utils.formatUnits(amount0Out, digits0)} (${amount0Out})`,
-    amount1Out: `${ethers.utils.formatUnits(amount1Out, digits1)} (${amount1Out})`,
-    to: to,
-    block: tx.blockNumber,
-  });
+  prettyPrint('New swap detected', [
+    ['date', new Date()],
+    ['sender', sender],
+    ['amount0In', `${ethers.utils.formatUnits(amount0In, digits0)} (${amount0In})`],
+    ['amount1In', `${ethers.utils.formatUnits(amount1In, digits1)} (${amount1In})`],
+    ['amount0Out', `${ethers.utils.formatUnits(amount0Out, digits0)} (${amount0Out})`],
+    ['amount1Out', `${ethers.utils.formatUnits(amount1Out, digits1)} (${amount1Out})`],
+    ['to', to],
+    ['block', tx.blockNumber],
+  ]);
 }
 
 /**
@@ -41,13 +42,13 @@ export function printMintEvent(
   digits0: number = 18,
   digits1: number = 18
 ) {
-  prettyPrint('New mint detected', {
-    date: new Date(),
-    sender: sender,
-    amount0: `${ethers.utils.formatUnits(amount0, digits0)} (${amount0})`,
-    amount1: `${ethers.utils.formatUnits(amount1, digits1)} (${amount1})`,
-    block: tx.blockNumber,
-  });
+  prettyPrint('New mint detected', [
+    ['date', new Date()],
+    ['sender', sender],
+    ['amount0', `${ethers.utils.formatUnits(amount0, digits0)} (${amount0})`],
+    ['amount1', `${ethers.utils.formatUnits(amount1, digits1)} (${amount1})`],
+    ['block', tx.blockNumber],
+  ]);
 }
 
 /**
@@ -55,10 +56,10 @@ export function printMintEvent(
  * function.
  */
 export function printAmounts(amounts: BigNumber[], digits0: number, digits1: number) {
-  prettyPrint('Amounts', {
-    tokenIn: `${ethers.utils.formatUnits(amounts[0], digits0)} (${amounts[0]})`,
-    tokenOut: `${ethers.utils.formatUnits(amounts[1], digits1)} (${amounts[1]})`,
-  });
+  prettyPrint('Amounts', [
+    ['tokenIn', `${ethers.utils.formatUnits(amounts[0], digits0)} (${amounts[0]})`],
+    ['tokenOut', `${ethers.utils.formatUnits(amounts[1], digits1)} (${amounts[1]})`],
+  ]);
 }
 
 /**
@@ -78,41 +79,68 @@ export function printSwapReceipt(
 export function printTxReceipt(
   tx: TransactionReceipt,
   title: string = 'Tx receipt',
-  extraLinesBefore: Record<string, any> = {},
-  extraLinesAfter: Record<string, any> = {}
+  extraLinesBefore: [string, any][] = [],
+  extraLinesAfter: [string, any][] = []
 ) {
   const status = tx.status === 1 ? 'OK' : 'ERROR!';
   const type = tx.type === 2 ? 'EIP-1559' : 'Legacy';
-  const lines = {
-    hash: tx.transactionHash,
-    status: `${status} (${tx.status})`,
-    to: tx.to,
-    block: tx.blockNumber,
-    'Transaction Fee': `${ethers.utils.formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`,
-    effectiveGasPrice: `${ethers.utils.formatUnits(tx.effectiveGasPrice, 9)} gwei`,
-    gasUsed: tx.gasUsed,
-    cumulativeGasUsed: tx.cumulativeGasUsed,
-    type: `${type} (${tx.type})`,
-    confirmations: tx.confirmations,
-  };
-  prettyPrint(title, Object.assign(extraLinesBefore, lines, extraLinesAfter));
+  const lines = [
+    ['hash', tx.transactionHash],
+    ['status', `${status} (${tx.status})`],
+    ['to', tx.to],
+    ['block', tx.blockNumber],
+    ['Transaction Fee', `${ethers.utils.formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`],
+    ['effectiveGasPrice', `${ethers.utils.formatUnits(tx.effectiveGasPrice, 9)} gwei`],
+    ['gasUsed', tx.gasUsed],
+    ['cumulativeGasUsed', tx.cumulativeGasUsed],
+    ['type', `${type} (${tx.type})`],
+    ['confirmations', tx.confirmations],
+  ] as [string, any][];
+  prettyPrint(title, [...extraLinesBefore, ...lines, ...extraLinesAfter]);
+}
+
+/**
+ * Pretty print a parsed transaction.
+ *
+ * A parsed tx is a contract transaction that has been
+ * decoded with the contract's ABI interface.
+ */
+export function printParsedTx(
+  tx: TransactionDescription | null,
+  title: string = 'Parsed Tx',
+  extraLinesBefore: [string, any][] = [],
+  extraLinesAfter: [string, any][] = []
+): void {
+  if (!tx) {
+    return prettyPrint('Empty transaction', []);
+  }
+  const lines = [
+    ['method', tx.name],
+    ['sighash', tx.sighash],
+    ['value', tx.value],
+  ] as [string, any][];
+  console.log();
+  // Inputs
+  if (tx.functionFragment.inputs) {
+    lines.push(['args:', '']);
+  }
+  tx.functionFragment.inputs.forEach((v, i) => {
+    lines.push([` \\ ${v.name}`, tx.args[v.name]]);
+  });
+  prettyPrint(title, [...extraLinesBefore, ...lines, ...extraLinesAfter]);
 }
 
 /**
  * Pretty print an info message
  */
-export function prettyPrint(title: string, lines: Record<string, any>, nPadding: number = 4) {
+export function prettyPrint(title: string, lines: [string, any][], nPadding: number = 4): void {
   console.log(buildPrettyPrint(title, lines, nPadding));
 }
 
 /**
  * Build a pretty info message
  */
-export function buildPrettyPrint(
-  title: string,
-  lines: Record<string, any>,
-  nPadding: number
-): string {
+export function buildPrettyPrint(title: string, lines: [string, any][], nPadding: number): string {
   let padding: string = '';
   for (let i = 0; i < nPadding; i++) {
     padding += ' ';
@@ -124,9 +152,24 @@ export function buildPrettyPrint(
     footer += '=';
   }
   output += `${padding}${footer}\n`;
-  for (const key in lines) {
-    const value = lines[key];
-    output += `${padding}${key}: ${value}\n`;
+  lines.forEach((v) => {
+    output += `${padding}${v[0]}`;
+    if (v[1]) {
+      output += `: ${v[1]}`;
+    }
+    output += '\n';
+  });
+  return output;
+}
+
+/**
+ * Make an object suitable to be printed with
+ * the prettyPrint functions in this module
+ */
+export function prepare(obj: Record<string, any>): [string, any][] {
+  const output = [] as [string, any][];
+  for (const key in obj) {
+    output.push([key, obj[key]]);
   }
   return output;
 }

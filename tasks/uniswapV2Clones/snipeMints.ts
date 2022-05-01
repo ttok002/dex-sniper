@@ -1,11 +1,11 @@
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { BigNumber, ethers, Overrides } from 'ethers';
 import { task, types } from 'hardhat/config';
+import { validatePair } from '../../src/dexes/uniswapV2Clones/helpers/validation';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
 import { wait } from '../../src/helpers/general';
-import { validatePair } from '../../src/dexes/uniswapV2Clones/helpers/validation';
+import { prepare, prettyPrint, printMintEvent, printSwapReceipt } from '../../src/helpers/print';
 import { getSigner, startConnection } from '../../src/helpers/providers';
-import { TransactionReceipt } from '@ethersproject/abstract-provider';
-import { prettyPrint, printMintEvent, printSwapReceipt } from '../../src/helpers/print';
 
 task(
   'uniswapV2Clone:snipeMints',
@@ -69,7 +69,7 @@ task(
       hre
     ) => {
       // Parse parameters
-      prettyPrint('Arguments', args);
+      prettyPrint('Arguments', prepare(args));
       const { dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, fastnonce, to, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
 
       // Determine which token we are selling and which we are buying
@@ -86,7 +86,7 @@ task(
       const amountInBigNumber = ethers.utils.parseUnits(amountin + '', digitsIn);
       const minAmountOutBigNumber = ethers.utils.parseUnits(minamountout + '', digitsOut);
       const minLiquidityInBigNumber = ethers.utils.parseUnits(minliquidityin + '', digitsIn);
-      prettyPrint('Derived values', {tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber, minLiquidityInBigNumber}); // prettier-ignore
+      prettyPrint('Derived values', prepare({tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber, minLiquidityInBigNumber})); // prettier-ignore
 
       // Start the WebSocket connection
       startConnection(hre, async (hre, provider) => {
@@ -103,7 +103,7 @@ task(
         let nonce: number;
         if (fastnonce) {
           nonce = await signer.getTransactionCount();
-          prettyPrint('Initial nonce set', { nonce });
+          prettyPrint('Initial nonce set', prepare({ nonce }));
         }
 
         // Function that will be called after each liquidity add event
@@ -119,16 +119,16 @@ task(
           const liquidityInBigNumber = itokenin === 0 ? mintAmount0 : mintAmount1;
           // Exit if the liquidity added is too small
           if (minliquidityin && minLiquidityInBigNumber.gt(liquidityInBigNumber)) {
-            prettyPrint('Small liquidity!', {
-              msg: 'Exiting because liquidity add in token${itokenin} was too small',
-              liquidityIn: `${ethers.utils.formatUnits(liquidityInBigNumber, digitsIn)}`,
-              minLiquidityIn: minliquidityin,
-            });
+            prettyPrint('Small liquidity!', [
+              ['msg', 'Exiting because liquidity add in token${itokenin} was too small'],
+              ['liquidityIn', `${ethers.utils.formatUnits(liquidityInBigNumber, digitsIn)}`],
+              ['minLiquidityIn', minliquidityin],
+            ]);
             return;
           }
           // Exit if we are simulating
           if (dryrun) {
-            prettyPrint('Dry run', { msg: 'Exiting...' });
+            prettyPrint('Dry run', [['msg', 'Exiting...']]);
             return false;
           }
           // Optionally, compute nonce & gas manually
@@ -143,7 +143,7 @@ task(
               : undefined,
           };
           if (swapOverrides) {
-            prettyPrint('Overrides', swapOverrides);
+            prettyPrint('Overrides', prepare(swapOverrides));
           }
           // Swap.
           // We wrap the swap in a try-catch statement
@@ -165,7 +165,7 @@ task(
             const swapTxReceipt = await swapTx.wait(); // will throw if tx has error
             printSwapReceipt(swapTxReceipt, digitsIn, digitsOut);
           } catch (error) {
-            prettyPrint('Caught exception', { msg: (error as Error).message });
+            prettyPrint('Caught exception', [['msg', (error as Error).message]]);
           }
         };
 
