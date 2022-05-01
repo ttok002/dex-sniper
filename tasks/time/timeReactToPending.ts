@@ -46,15 +46,16 @@ task(
           ['time', Date.now() - t0],
           ['iteration', n],
         ]);
-        exit(0);
+        provider.removeAllListeners();
+        return;
       }
       // React immediately by sending 1 gwei
-      prettyPrint('Reacting...', [
+      prettyPrint(`Reacting to ${txRes.hash.substring(0, 7)}...`, [
         ['time', Date.now() - t0],
         ['iteration', n],
       ]);
       const sendTxRes = await signer.sendTransaction({ to: address, value: 1 });
-      printTxResponse(sendTxRes, 'Reaction response', [
+      printTxResponse(sendTxRes, `Reaction to ${txRes.hash.substring(0, 7)}`, [
         ['time', Date.now() - t0],
         ['iteration', n],
       ]);
