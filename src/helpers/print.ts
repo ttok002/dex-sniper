@@ -1,5 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
-import { TransactionReceipt } from '@ethersproject/abstract-provider';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
 import { ethers } from 'ethers';
 import { TransactionDescription } from 'ethers/lib/utils';
 
@@ -100,6 +100,37 @@ export function printTxReceipt(
 }
 
 /**
+ * Pretty print a transaction response.
+ *
+ * A tx response is the object returned by the
+ * getTransaction function (which calls the RPC
+ * method getTransactionByHash).
+ */
+export function printTxResponse(
+  tx: TransactionResponse | null,
+  title: string = 'Tx response',
+  extraLinesBefore: [string, any][] = [],
+  extraLinesAfter: [string, any][] = [],
+  withData: boolean = false
+): void {
+  if (!tx) {
+    return prettyPrint('Empty tx response!', []);
+  }
+  const lines = [
+    ['hash', tx.hash],
+    ['from', tx.from],
+    ['to', tx.to],
+    ['confirmations', tx.confirmations],
+    ['blockNumber', tx.blockNumber],
+    ['value', tx.value],
+  ] as [string, any][];
+  if (withData) {
+    lines.push(['data', tx.data]);
+  }
+  prettyPrint(title, [...extraLinesBefore, ...lines, ...extraLinesAfter]);
+}
+
+/**
  * Pretty print a parsed transaction.
  *
  * A parsed tx is a contract transaction that has been
@@ -109,17 +140,17 @@ export function printParsedTx(
   tx: TransactionDescription | null,
   title: string = 'Parsed Tx',
   extraLinesBefore: [string, any][] = [],
-  extraLinesAfter: [string, any][] = []
+  extraLinesAfter: [string, any][] = [],
+  nPadding: number = 4
 ): void {
   if (!tx) {
-    return prettyPrint('Empty transaction', []);
+    return prettyPrint('Empty parsed tx!', []);
   }
   const lines = [
     ['method', tx.name],
     ['sighash', tx.sighash],
     ['value', tx.value],
   ] as [string, any][];
-  console.log();
   // Inputs
   if (tx.functionFragment.inputs) {
     lines.push(['args:', '']);
@@ -127,7 +158,7 @@ export function printParsedTx(
   tx.functionFragment.inputs.forEach((v, i) => {
     lines.push([` \\ ${v.name}`, tx.args[v.name]]);
   });
-  prettyPrint(title, [...extraLinesBefore, ...lines, ...extraLinesAfter]);
+  prettyPrint(title, [...extraLinesBefore, ...lines, ...extraLinesAfter], nPadding);
 }
 
 /**

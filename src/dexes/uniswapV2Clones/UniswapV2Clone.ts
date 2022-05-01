@@ -1,13 +1,12 @@
 import { Contract, ethers, Event, constants, BigNumber, logger } from 'ethers';
 import { Dex } from '../Dex';
 import {
-  AddLiquidityMethodCallback,
   BurnEventCallback,
   MintEventCallback,
   PairCreatedEventCallback,
   SwapEventCallback,
 } from '../types';
-import { TransactionReceipt } from '@ethersproject/abstract-provider';
+import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
 import { isResponseFrom, isResponseTo } from '../../helpers/transactions';
 import { TransactionDescription } from 'ethers/lib/utils';
 
@@ -247,7 +246,7 @@ export abstract class UniswapV2Clone extends Dex {
    * address.
    */
   listenToRouterPendingTxs(
-    callback: (t: TransactionDescription) => void,
+    callback: (txDesc: TransactionDescription, txResp: TransactionResponse) => void,
     from: string | null = null,
     routerAddress: string = this.routerAddress
   ): void {
@@ -259,7 +258,7 @@ export abstract class UniswapV2Clone extends Dex {
       if (from && !isResponseFrom(res, from)) {
         return null;
       }
-      callback(this.getRouter().interface.parseTransaction(res));
+      callback(this.getRouter().interface.parseTransaction(res), res);
     });
   }
 }

@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
 import { wait } from '../../src/helpers/general';
-import { printParsedTx } from '../../src/helpers/print';
+import { printParsedTx, printTxResponse } from '../../src/helpers/print';
 import { getProvider } from '../../src/helpers/providers';
 
 task(
@@ -13,8 +13,9 @@ task(
   .setAction(async ({ dexName, from }, hre) => {
     const provider = getProvider(hre);
     const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name);
-    dex.listenToRouterPendingTxs((tx) => {
-      printParsedTx(tx);
+    dex.listenToRouterPendingTxs((txDesc, txResp) => {
+      printTxResponse(txResp);
+      printParsedTx(txDesc, `Details of ${txResp.hash.substring(0, 7)}`, [], [], 8);
     }, from);
     return wait();
   });
