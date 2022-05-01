@@ -185,7 +185,7 @@ export function buildPrettyPrint(title: string, lines: [string, any][], nPadding
   output += `${padding}${footer}\n`;
   lines.forEach((v) => {
     output += `${padding}${v[0]}`;
-    if (v[1]) {
+    if (v[1] !== '') {
       output += `: ${v[1]}`;
     }
     output += '\n';

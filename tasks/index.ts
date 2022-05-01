@@ -42,3 +42,4 @@ import './utils/sendEth';
 import './time/timeGetProvider';
 import './time/timeGetLatestBlock';
 import './time/timeGetPendingTransaction';
+import './time/timeReactToPending';
