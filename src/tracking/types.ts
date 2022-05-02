@@ -1,6 +1,7 @@
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
 
-export interface logTx {
+export interface LogTx {
+  id: number; // internal id in the log
   hash: string;
   tags: string[];
   blockNumber?: number;
