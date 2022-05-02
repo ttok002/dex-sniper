@@ -20,7 +20,7 @@ export class TxTracker {
    * @returns {number} The ID of the added tx in the log,
    * 0 if the tx was not added.
    */
-  add(txHash: string, tags: string[], doubleCheck = false): number {
+  add(txHash: string, tags: string[] = [], doubleCheck = false): number {
     if (doubleCheck && this.findTx(txHash)) {
       return 0;
     }

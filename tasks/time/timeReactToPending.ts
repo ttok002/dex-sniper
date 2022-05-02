@@ -51,8 +51,6 @@ task(
     const self = await signer.getAddress();
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {
-      // Check for duplicate transactions
-      const isDuplicate = txTracker.findTx(inboundTxHash) !== -1;
       // Log & fetch pending transaction
       const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
       const inboundTx = await provider.getTransaction(inboundTxHash);
@@ -66,27 +64,10 @@ task(
         return;
       }
       // React only to pending transactions. Needed because the
-      // 'pending' filter the tx first in pending then confirmed.
-      // Most of these confirmed tx hashes have already been logged
-      // (isDuplicate==true). Those who aren't logged yet (isDuplicate=false)
-      // should follow in one of two categories:
-      // 1. Txs that were pending before we turned on the listener.
-      // 2. Txs that for some reason were not in the node's mempool when
-      //    they were not confirmed.
-      // The txs in category 1 should decay fast with time, so that after a
-      // few blocks from starting the listener, you should have only txs
-      // in category 2.
+      // 'pending' listener always finds the same tx twice: first
+      // as a pending tx, and then as a confirmed tx.
       if (isResponsePending(inboundTx) !== true) {
         return;
-      }
-      // The above checks should avoid duplicate transactions,
-      // but you never know.
-      if (isDuplicate) {
-        // It's ok if the trigger is already in the log, since we sent it
-        if (!txTracker.getTxByHash(inboundTxHash).tags.includes('trigger')) {
-          prettyPrint('Duplicate transaction!', [['hash', inboundTxHash]]);
-          return;
-        }
       }
       // Increase processed transactions counter
       n += 1;
