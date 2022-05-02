@@ -5,7 +5,7 @@ import { TransactionResponse } from '@ethersproject/abstract-provider';
  * from the given address
  */
 export function isResponseFrom(res: TransactionResponse, address: string): boolean {
-  return res && res.from?.toLowerCase() === address.toLowerCase();
+  return res && res?.from?.toLowerCase() === address.toLowerCase();
 }
 
 /**
@@ -13,7 +13,7 @@ export function isResponseFrom(res: TransactionResponse, address: string): boole
  * the given recipient address
  */
 export function isResponseTo(res: TransactionResponse, address: string): boolean {
-  return res && res.to?.toLowerCase() === address.toLowerCase();
+  return res && res?.to?.toLowerCase() === address.toLowerCase();
 }
 
 /**
@@ -21,5 +21,5 @@ export function isResponseTo(res: TransactionResponse, address: string): boolean
  * from a mempool transaction
  */
 export function isResponsePending(res: TransactionResponse): boolean {
-  return res && res.confirmations === 0;
+  return res && res?.confirmations === 0;
 }
