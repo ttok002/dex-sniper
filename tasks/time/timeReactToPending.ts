@@ -11,7 +11,7 @@ task(
   'time:reactToPending',
   'If the given address sends a transaction, react by self-sending 1 wei. Useful to time reaction speed.'
 )
-  .addOptionalParam('from', 'Address to monitor')
+  .addParam('from', 'Address to monitor')
   .addOptionalParam(
     'nMax',
     'Stop listening after nMax transactions (to avoid infinite loops)',
