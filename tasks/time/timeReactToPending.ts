@@ -11,7 +11,7 @@ task(
   'time:reactToPending',
   'If the given address sends a transaction, react by self-sending 1 wei. Useful to time reaction speed.'
 )
-  .addParam('accountNumber', "Who's supposed to send the monies", 1, types.int)
+  .addParam('account', "Who's sending the monies")
   .addParam('from', 'Address to monitor')
   .addOptionalParam(
     'nMax',
@@ -25,7 +25,7 @@ task(
     false,
     types.boolean
   )
-  .setAction(async ({ accountNumber, from, nMax, trigger }, hre) => {
+  .setAction(async ({ account, from, nMax, trigger }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -48,7 +48,7 @@ task(
     }
     // Get signer
     const provider = getProvider(hre);
-    const signer = getSigner(hre, accountNumber, provider);
+    const signer = getSigner(hre, account, provider);
     const self = await signer.getAddress();
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {

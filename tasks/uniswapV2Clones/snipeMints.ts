@@ -13,7 +13,7 @@ task(
   'Swap as soon as liquidity is added on the given pair. Token should be pre-approved.'
 )
   .addPositionalParam('dexName', 'DEX to consider, e.g. UniswapV2')
-  .addParam('accountNumber', "Who's supposed to do the swap", 1, types.int)
+  .addParam('account', "Who's supposed to do the swap")
   .addParam('pair', 'Pair to spy')
   .addParam('token0', 'Address of 1st token in the pair')
   .addParam('token1', 'Address of 2nd token in the pair')
@@ -50,7 +50,7 @@ task(
     async (
       args: {
         dexName: string;
-        accountNumber: number;
+        account: string;
         pair: string;
         token0: string;
         token1: string;
@@ -73,7 +73,7 @@ task(
     ) => {
       // Parse parameters
       prettyPrint('Arguments', prepare(args));
-      const { dexName, accountNumber, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, fastnonce, to, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
+      const { dexName, account, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, fastnonce, to, gasLimit, maxFeePerGas, maxPriorityFeePerGas, deadline, minliquidityin, runonce, dryrun } = args; // prettier-ignore
 
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
@@ -94,7 +94,7 @@ task(
       // Start the WebSocket connection
       startConnection(hre, async (hre, provider) => {
         // Load credentials and get dex object
-        const signer = getSigner(hre, accountNumber, provider);
+        const signer = getSigner(hre, account, provider);
         const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name, signer);
 
         // Check that the given pair corresponds to the tokens
