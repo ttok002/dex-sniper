@@ -3,7 +3,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 import './tasks/index';
 import { getenv } from './src/common/dotenv';
-import { parseAccounts } from './src/helpers/signers';
+import { accounts, getNetworkAccounts } from './src/common/config';
 
 /**
  * Configuration for Harhat
@@ -13,21 +13,21 @@ const config: HardhatUserConfig = {
   networks: {
     avalanche: {
       url: getenv('AVALANCHE_URL'),
-      accounts: parseAccounts('avalanche'),
+      accounts: getNetworkAccounts('avalanche').map((a) => a.key),
       chainId: 43114,
     },
     avalancheValidator: {
       url: getenv('AVALANCHE_VALIDATOR_URL'),
-      accounts: parseAccounts('avalanche'),
+      accounts: getNetworkAccounts('avalanche').map((a) => a.key),
       chainId: 43114,
     },
     ethereum: {
       url: getenv('ETHEREUM_URL'),
-      accounts: parseAccounts('ethereum'),
+      accounts: getNetworkAccounts('ethereum').map((a) => a.key),
     },
     cronos: {
       url: getenv('CRONOS_URL'),
-      accounts: parseAccounts('cronos'),
+      accounts: getNetworkAccounts('cronos').map((a) => a.key),
       chainId: 25,
     },
   },
