@@ -88,6 +88,7 @@ export function printTxReceipt(
     ['hash', tx.transactionHash],
     ['status', `${status} (${tx.status})`],
     ['to', tx.to],
+    ['from', tx.from],
     ['block', tx.blockNumber],
     ['Transaction Fee', `${ethers.utils.formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`],
     ['effectiveGasPrice', `${ethers.utils.formatUnits(tx.effectiveGasPrice, 9)} gwei`],
