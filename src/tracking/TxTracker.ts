@@ -115,8 +115,12 @@ export class TxTracker {
    * or -1 if not found.
    */
   findTx(txHash: string): number {
-    const txs = this.txs.filter((tx) => tx.hash === txHash);
-    return txs[0].id ?? -1;
+    const txHashes = this.txs.map((t) => t.hash);
+    const position = txHashes.indexOf(txHash);
+    if (position === -1) {
+      return -1;
+    }
+    return this.txs[position].id;
   }
 
   /**
