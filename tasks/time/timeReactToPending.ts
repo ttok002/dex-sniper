@@ -1,5 +1,6 @@
 import { logger } from 'ethers';
 import { task, types } from 'hardhat/config';
+import { exit } from 'process';
 import { wait } from '../../src/helpers/general';
 import { prettyPrint, printTxResponse } from '../../src/helpers/print';
 import { getProvider, getSigner } from '../../src/helpers/providers';
@@ -42,7 +43,7 @@ task(
           `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.tags}] `,
         ])
       );
-      return;
+      exit(1);
     }
     // Get signer
     const provider = getProvider(hre);
@@ -51,6 +52,7 @@ task(
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {
       // Log & fetch pending transaction
+      const isDuplicate = txTracker.findTx(inboundTxHash) !== -1;
       const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
       const inboundTx = await provider.getTransaction(inboundTxHash);
       txTracker.addTiming(inboundTxLogId, `fetch`);
@@ -59,11 +61,27 @@ task(
         return;
       }
       // Consider only txs from address
-      if (!isResponseFrom(inboundTx, from)) {
+      if (from && isResponseFrom(inboundTx, from) !== true) {
         return;
       }
-      // React only to pending transactions
-      if (!isResponsePending(inboundTx)) {
+      // React only to pending transactions. Needed because the
+      // 'pending' filter the tx first in pending then confirmed.
+      // Most of these confirmed tx hashes have already been logged
+      // (isDuplicate==true). Those who aren't logged yet (isDuplicate=false)
+      // should follow in one of two categories:
+      // 1. Txs that were pending before we turned on the listener.
+      // 2. Txs that for some reason were not in the node's mempool when
+      //    they were not confirmed.
+      // The txs in category 1 should decay fast with time, so that after a
+      // few blocks from starting the listener, you should have only txs
+      // in category 2.
+      if (isResponsePending(inboundTx) !== true) {
+        return;
+      }
+      // The above checks should avoid duplicate transactions,
+      // but you never know.
+      if (isDuplicate) {
+        prettyPrint('Duplicate transaction!', [['hash', inboundTxHash]]);
         return;
       }
       // Increase processed transactions counter
