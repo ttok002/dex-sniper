@@ -164,7 +164,11 @@ export function printParsedTx(
 /**
  * Pretty print an info message
  */
-export function prettyPrint(title: string, lines: [string, any][], nPadding: number = 4): void {
+export function prettyPrint(
+  title: string,
+  lines: [string, any][] = [],
+  nPadding: number = 4
+): void {
   logger.info(buildPrettyPrint(title, lines, nPadding));
 }
 

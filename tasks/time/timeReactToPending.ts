@@ -1,3 +1,4 @@
+import { logger } from 'ethers';
 import { task, types } from 'hardhat/config';
 import { wait } from '../../src/helpers/general';
 import { prettyPrint, printTxResponse } from '../../src/helpers/print';
@@ -23,8 +24,6 @@ task(
     types.boolean
   )
   .setAction(async ({ from, nMax, trigger }, hre) => {
-    // Initialize timer
-    const t0 = Date.now();
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -32,10 +31,16 @@ task(
     // Print a summary on exit
     process.on('SIGINT', printReport);
     async function printReport() {
-      const loggedTxs = await txTracker.fetchReceipts(provider);
+      const txsToKeep = await TxTracker.fetchReceipts(
+        txTracker.getTxsByTag(['keep', 'out']),
+        provider
+      );
       prettyPrint(
         'Transactions summary',
-        loggedTxs.map((tx) => [tx.hash, `${tx.blockNumber} [${tx.tags}]`])
+        txsToKeep.map((tx) => [
+          tx.hash,
+          `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.tags}] `,
+        ])
       );
       return;
     }
@@ -44,55 +49,61 @@ task(
     const signer = getSigner(hre, provider);
     const self = await signer.getAddress();
     // Listen to tx
-    provider.on('pending', async (txHash) => {
+    provider.on('pending', async (inboundTxHash) => {
+      // Log & fetch pending transaction
+      const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
+      const inboundTx = await provider.getTransaction(inboundTxHash);
+      txTracker.addTiming(inboundTxLogId, `fetch`);
+      if (!inboundTx) {
+        prettyPrint('Empty pending transaction!');
+        return;
+      }
       // Consider only txs from address
-      const txRes = await provider.getTransaction(txHash);
-      if (!isResponseFrom(txRes, from)) {
+      if (!isResponseFrom(inboundTx, from)) {
         return;
       }
       // React only to pending transactions
-      if (!isResponsePending(txRes)) {
+      if (!isResponsePending(inboundTx)) {
         return;
       }
-      // Increase pending transaction counter
+      // Increase processed transactions counter
       n += 1;
-      printTxResponse(txRes, 'Received tx!', [
-        ['time', Date.now() - t0],
-        ['iteration', n],
-      ]);
-      txTracker.add(txRes.hash, ['in']);
-      // Avoid falling in an unpleasant infinite loop
       if (n > nMax) {
-        prettyPrint(`Won't react to ${txRes.hash.substring(0, 7)}`, [
-          ['time', Date.now() - t0],
-          ['iteration', n],
-        ]);
+        prettyPrint(`Won't react to ${inboundTxHash.substring(0, 7)}`, [['iteration', n]]);
         provider.removeAllListeners();
         return;
       }
+      txTracker.addTag(inboundTxLogId, 'keep');
+      printTxResponse(inboundTx, 'Received tx!', [['iteration', n]]);
+      // Avoid falling in an unpleasant infinite loop
       // React immediately by sending 1 gwei
-      prettyPrint(`Reacting to ${txRes.hash.substring(0, 7)}...`, [
-        ['time', Date.now() - t0],
-        ['iteration', n],
+      prettyPrint(`Reacting to ${inboundTxHash.substring(0, 7)}...`, [['iteration', n]]);
+      const outboundTxLogId = txTracker.add('', [
+        'out',
+        `triggered by ${inboundTxHash.substring(0, 7)}`,
       ]);
-      const sendTxRes = await signer.sendTransaction({ to: self, value: 1 });
-      printTxResponse(sendTxRes, `Reaction to ${txRes.hash.substring(0, 7)}`, [
-        ['time', Date.now() - t0],
-        ['iteration', n],
-      ]);
-      txTracker.add(sendTxRes.hash, ['out', `triggered by ${txRes.hash.substring(0, 7)}`]);
+      const outboundTx = await signer.sendTransaction({ to: self, value: 1 });
+      txTracker.update(outboundTxLogId, outboundTx.hash);
+      txTracker.addTiming(outboundTxLogId, 'sent');
+      printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
       // Wrap up!
-      if (n == nMax) {
+      if (n >= nMax) {
         await printReport();
         return;
       }
     });
     // Optionally trigger the listener
     if (trigger) {
-      prettyPrint('Sending trigger...', [['time', Date.now() - t0]]);
-      const sendTxRes = await signer.sendTransaction({ to: self, value: 1 });
-      printTxResponse(sendTxRes, 'Trigger', [['time', Date.now() - t0]]);
-      txTracker.add(sendTxRes.hash, ['out', 'trigger']);
+      prettyPrint('Sending trigger...');
+      const triggerTxLogId = txTracker.add('', ['out', 'trigger']);
+      const triggerTx = await signer.sendTransaction({ to: self, value: 1 });
+      if (!triggerTx) {
+        prettyPrint('Empty trigger transaction!');
+        return;
+      }
+      txTracker.update(triggerTxLogId, triggerTx.hash);
+      txTracker.addTiming(triggerTxLogId, 'sent');
+      printTxResponse(triggerTx, 'Trigger');
     }
     return wait();
   });

@@ -1,18 +1,21 @@
-import { LogTx } from './types';
+import { LogTx, TxTiming } from './types';
 import { Provider } from '@ethersproject/providers';
 
 /**
  * Track transactions on the fly to allow for later
  * analysis.
+ *
+ * TODO: Use uuid for the ids
  */
 export class TxTracker {
   txs: LogTx[] = [];
+  t0: number = Date.now();
 
   /**
    * Log a transaction.
    *
-   * If the transaction was already logged and doubleCheck
-   * is true, do nothing.
+   * Optionally, set doubleCheck=true not to add the transaction if it
+   * already exists in the log.
    *
    * @returns {number} The ID of the added tx in the log,
    * 0 if the tx was not added.
@@ -21,7 +24,15 @@ export class TxTracker {
     if (doubleCheck && this.findTx(txHash)) {
       return 0;
     }
-    return this.txs.push({ id: this.txs.length + 1, hash: txHash, tags });
+    const id = this.txs.length + 1;
+    this.txs.push({
+      id: id,
+      hash: txHash,
+      tags,
+      timings: [],
+    });
+    this.addTiming(id, 'start');
+    return id;
   }
 
   /**
@@ -29,7 +40,7 @@ export class TxTracker {
    * not fetch the tx receipt.
    */
   update(id: number, txHash: string | null = null, tags: string[] | null = null) {
-    const tx = this.txs[id];
+    const tx = this.getTx(id);
     if (txHash) {
       tx.hash = txHash;
     }
@@ -73,6 +84,24 @@ export class TxTracker {
   }
 
   /**
+   * Add a timing to the transaction with the given ID.
+   *
+   * @returns {TxTiming[]} The timings of the transaction, so far
+   */
+  addTiming(id: number, stepName: string): TxTiming[] {
+    const tx = this.getTx(id);
+    const tNow = Date.now();
+    tx.timings.push({
+      label: stepName,
+      absolute: tNow,
+      sinceStart: tNow - this.t0,
+      sinceFirst: tNow - (tx.timings[0]?.absolute ?? tNow),
+      sinceLast: tNow - (tx.timings[tx.timings.length - 1]?.absolute ?? tNow),
+    });
+    return tx.timings;
+  }
+
+  /**
    * Return the tags of the given transaction
    */
   getTags(id: number): string[] {
@@ -91,16 +120,62 @@ export class TxTracker {
   }
 
   /**
-   * Fetch receipt for all txs in the log
+   * Return one line with all the timings of the transaction with
+   * the given ID
    */
-  async fetchReceipts(provider: Provider): Promise<LogTx[]> {
-    for (let i = 0; i < this.txs.length; i++) {
-      const logTx = this.txs[i];
+  formatTimings(id: number, delimiter = '|'): string {
+    const tx = this.getTx(id);
+    const data = tx.timings.map((t, i) => {
+      if (i === 0) {
+        return `${t.label}=${t.sinceStart}`;
+      }
+      return `${t.label}=+${t.sinceFirst}ms`;
+    });
+    return data.join(delimiter);
+  }
+
+  /**
+   * Return all txs with the given tags,
+   * preserving order
+   */
+  getTxsByTag(tags: string[]) {
+    const allTxs = this.getAllTxs();
+    const filteredTxs: LogTx[] = [];
+    for (let i = 0; i < allTxs.length; i++) {
+      const tx = allTxs[i];
+      const intersection = tags.filter((tag) => tx.tags.includes(tag));
+      if (intersection.length) {
+        filteredTxs.push(tx);
+      }
+    }
+    return filteredTxs;
+  }
+
+  /**
+   * Attach receipt to the given txs
+   *
+   * @returns The txs with the receipt attached
+   */
+  static async fetchReceipts(txs: LogTx[], provider: Provider): Promise<LogTx[]> {
+    for (let i = 0; i < txs.length; i++) {
+      const logTx = txs[i];
+      if (!logTx.hash) {
+        continue;
+      }
       if (!logTx.receipt) {
         logTx.receipt = await provider.waitForTransaction(logTx.hash);
       }
       logTx.blockNumber = logTx.receipt.blockNumber;
     }
-    return this.txs;
+    return txs;
+  }
+
+  /**
+   * Attach receipt to all the transactions in the log
+   *
+   * @returns The txs with the receipt attached
+   */
+  async fetchAllReceipts(provider: Provider): Promise<LogTx[]> {
+    return TxTracker.fetchReceipts(this.txs, provider);
   }
 }
