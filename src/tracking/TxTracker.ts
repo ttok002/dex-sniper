@@ -111,8 +111,8 @@ export class TxTracker {
   /**
    * Search the log for given transaction hash.
    *
-   * @returns {number} The ID of the transaction in the log,
-   * or -1 if not found.
+   * @returns {number} The ID of the first transaction in the
+   * log with the given hash, or -1 if not found.
    */
   findTx(txHash: string): number {
     const txHashes = this.txs.map((t) => t.hash);
@@ -121,6 +121,14 @@ export class TxTracker {
       return -1;
     }
     return this.txs[position].id;
+  }
+
+  /**
+   * Return the first transaction with the given hash
+   */
+  getTxByHash(txHash: string): LogTx {
+    const id = this.findTx(txHash);
+    return this.getTx(id);
   }
 
   /**

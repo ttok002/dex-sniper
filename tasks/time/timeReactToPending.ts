@@ -51,8 +51,9 @@ task(
     const self = await signer.getAddress();
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {
-      // Log & fetch pending transaction
+      // Check for duplicate transactions
       const isDuplicate = txTracker.findTx(inboundTxHash) !== -1;
+      // Log & fetch pending transaction
       const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
       const inboundTx = await provider.getTransaction(inboundTxHash);
       txTracker.addTiming(inboundTxLogId, `fetch`);
@@ -81,8 +82,11 @@ task(
       // The above checks should avoid duplicate transactions,
       // but you never know.
       if (isDuplicate) {
-        prettyPrint('Duplicate transaction!', [['hash', inboundTxHash]]);
-        return;
+        // It's ok if the trigger is already in the log, since we sent it
+        if (!txTracker.getTxByHash(inboundTxHash).tags.includes('trigger')) {
+          prettyPrint('Duplicate transaction!', [['hash', inboundTxHash]]);
+          return;
+        }
       }
       // Increase processed transactions counter
       n += 1;
