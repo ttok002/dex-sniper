@@ -32,7 +32,7 @@ task(
     process.on('SIGINT', printReport);
     async function printReport() {
       const txsToKeep = await TxTracker.fetchReceipts(
-        txTracker.getTxsByTag(['keep', 'out']),
+        txTracker.getTxsByTag(['valid', 'out']),
         provider
       );
       prettyPrint(
@@ -68,14 +68,18 @@ task(
       }
       // Increase processed transactions counter
       n += 1;
+      // Avoid falling in an unpleasant infinite loop
       if (n > nMax) {
-        prettyPrint(`Won't react to ${inboundTxHash.substring(0, 7)}`, [['iteration', n]]);
+        prettyPrint(`Reached nMax, won't react`, [
+          ['pending tx', inboundTxHash.substring(0, 7)],
+          ['iteration', n],
+          ['nMax', nMax],
+        ]);
         provider.removeAllListeners();
         return;
       }
-      txTracker.addTag(inboundTxLogId, 'keep');
+      txTracker.addTag(inboundTxLogId, 'valid');
       printTxResponse(inboundTx, 'Received tx!', [['iteration', n]]);
-      // Avoid falling in an unpleasant infinite loop
       // React immediately by sending 1 gwei
       prettyPrint(`Reacting to ${inboundTxHash.substring(0, 7)}...`, [['iteration', n]]);
       const outboundTxLogId = txTracker.add('', [
@@ -86,11 +90,6 @@ task(
       txTracker.update(outboundTxLogId, outboundTx.hash);
       txTracker.addTiming(outboundTxLogId, 'sent');
       printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
-      // Wrap up!
-      if (n >= nMax) {
-        await printReport();
-        return;
-      }
     });
     // Optionally trigger the listener
     if (trigger) {
