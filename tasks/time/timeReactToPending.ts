@@ -1,9 +1,9 @@
-import { logger } from 'ethers';
 import { task, types } from 'hardhat/config';
 import { exit } from 'process';
 import { wait } from '../../src/helpers/general';
 import { prettyPrint, printTxResponse } from '../../src/helpers/print';
-import { getProvider, getSigner } from '../../src/helpers/providers';
+import { getProvider } from '../../src/helpers/providers';
+import { getSigner } from '../../src/helpers/signers';
 import { isResponseFrom, isResponsePending } from '../../src/helpers/transactions';
 import { TxTracker } from '../../src/tracking/TxTracker';
 
@@ -11,6 +11,7 @@ task(
   'time:reactToPending',
   'If the given address sends a transaction, react by self-sending 1 wei. Useful to time reaction speed.'
 )
+  .addParam('accountNumber', "Who's supposed to send the monies", 1, types.int)
   .addParam('from', 'Address to monitor')
   .addOptionalParam(
     'nMax',
@@ -24,7 +25,7 @@ task(
     false,
     types.boolean
   )
-  .setAction(async ({ from, nMax, trigger }, hre) => {
+  .setAction(async ({ accountNumber, from, nMax, trigger }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -47,7 +48,7 @@ task(
     }
     // Get signer
     const provider = getProvider(hre);
-    const signer = getSigner(hre, provider);
+    const signer = getSigner(hre, accountNumber, provider);
     const self = await signer.getAddress();
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {

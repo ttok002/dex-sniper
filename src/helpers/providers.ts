@@ -1,5 +1,4 @@
 import { Provider } from '@ethersproject/providers';
-import { Signer } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { URL } from 'url';
 import { logger, LOGGING, onProviderDebug } from '../common/logger';
@@ -35,19 +34,6 @@ export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Pro
     provider.on('debug', onProviderDebug);
   }
   return provider;
-}
-
-/**
- * Return a wallet able to sign transactions, using
- * the first private key provided for the current network
- */
-export function getSigner(hre: HardhatRuntimeEnvironment, provider?: Provider): Signer {
-  if (!provider) {
-    provider = getProvider(hre);
-  }
-  const { network, ethers } = hre;
-  const keyOfFirstAccount = (network as any).config.accounts[0] as string;
-  return new ethers.Wallet(keyOfFirstAccount, provider);
 }
 
 /**

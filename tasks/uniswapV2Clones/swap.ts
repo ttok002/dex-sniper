@@ -3,13 +3,15 @@ import { task, types } from 'hardhat/config';
 import { validatePair } from '../../src/dexes/uniswapV2Clones/helpers/validation';
 import { UniswapV2CloneFactory } from '../../src/dexes/uniswapV2Clones/UniswapV2CloneFactory';
 import { prepare, prettyPrint, printAmounts, printSwapReceipt } from '../../src/helpers/print';
-import { getProvider, getSigner } from '../../src/helpers/providers';
+import { getProvider } from '../../src/helpers/providers';
+import { getSigner } from '../../src/helpers/signers';
 
 task(
   'uniswapV2Clone:swap',
   'Wrapper to the RouterV2 swap function (https://docs.uniswap.org/protocol/V2/reference/smart-contracts/router-02#swapexacttokensfortokens)'
 )
   .addPositionalParam('dexName', 'DEX to consider, e.g. UniswapV2')
+  .addParam('accountNumber', "Who's supposed to do the swap", 1, types.int)
   .addParam('pair', 'Liquidity pair')
   .addParam('token0', 'Address of 1st token in the pair')
   .addParam('token1', 'Address of 2nd token in the pair')
@@ -25,6 +27,7 @@ task(
     async (
       args: {
         dexName: string;
+        accountNumber: number;
         pair: string;
         token0: string;
         token1: string;
@@ -40,7 +43,7 @@ task(
       hre
     ) => {
       prettyPrint('Arguments', prepare(args));
-      const {dexName, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, deadline, to, dryrun} = args; // prettier-ignore
+      const {dexName, accountNumber, pair, token0, token1, digits0, digits1, itokenin, amountin, minamountout, deadline, to, dryrun} = args; // prettier-ignore
       // Determine which token we are selling and which we are buying
       let tokenIn: string, tokenOut: string, digitsIn: number, digitsOut: number;
       if (itokenin === 0) {
@@ -56,7 +59,7 @@ task(
       prettyPrint('Derived values', prepare({tokenIn, tokenOut, amountInBigNumber, minAmountOutBigNumber})); // prettier-ignore
       // Load credentials and get dex object
       const provider = getProvider(hre);
-      const signer = getSigner(hre, provider);
+      const signer = getSigner(hre, accountNumber, provider);
       const dex = new UniswapV2CloneFactory().create(dexName, provider, hre.network.name, signer);
       // Check that the given pair corresponds to the tokens
       if (!validatePair(dex, pair, tokenIn, tokenOut, true)) {
