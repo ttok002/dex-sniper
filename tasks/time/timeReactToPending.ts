@@ -19,13 +19,7 @@ task(
     1,
     types.int
   )
-  .addOptionalParam(
-    'trigger',
-    'Self-send 1 wei immediately after setting up the listener. If the address is the same as the account, the reactiom will be automatically triggered. this is the fastest possible scenario because trigger & listener are on the same node.',
-    false,
-    types.boolean
-  )
-  .setAction(async ({ account, from, nMax, trigger }, hre) => {
+  .setAction(async ({ account, from, nMax }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -95,18 +89,5 @@ task(
       txTracker.addTiming(outboundTxLogId, 'sent');
       printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
     });
-    // Optionally trigger the listener
-    if (trigger) {
-      prettyPrint('Sending trigger...');
-      const triggerTxLogId = txTracker.add('', ['out', 'trigger']);
-      const triggerTx = await signer.sendTransaction({ to: self, value: 1 });
-      if (!triggerTx) {
-        prettyPrint('Empty trigger transaction!');
-        return;
-      }
-      txTracker.update(triggerTxLogId, triggerTx.hash);
-      txTracker.addTiming(triggerTxLogId, 'sent');
-      printTxResponse(triggerTx, 'Trigger');
-    }
     return wait();
   });
