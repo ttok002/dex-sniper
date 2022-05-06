@@ -9,17 +9,20 @@ import { TxTracker } from '../../src/tracking/TxTracker';
 
 task(
   'time:reactToPending',
-  'If the given address sends a transaction, react by self-sending 1 wei. Useful to time reaction speed.'
+  'Whenever the given address sends a transaction, react by self-sending 1 wei. Useful to time reaction speed.'
 )
-  .addParam('account', "Who's sending the monies")
-  .addParam('from', 'Address to monitor')
+  .addParam('account', 'The account that will send (and receive) the monies')
+  .addParam(
+    'addressToMonitor',
+    "Address to monitor. If qual to 'account', make sure you set a low enough value for nMax to avoid infinite loops."
+  )
   .addOptionalParam(
     'nMax',
     'Stop listening after nMax transactions (to avoid infinite loops)',
     1,
     types.int
   )
-  .setAction(async ({ account, from, nMax }, hre) => {
+  .setAction(async ({ account, addressToMonitor, nMax }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -55,7 +58,7 @@ task(
         return;
       }
       // Consider only txs from address
-      if (from && isResponseFrom(inboundTx, from) !== true) {
+      if (isResponseFrom(inboundTx, addressToMonitor) !== true) {
         return;
       }
       // React only to pending transactions. Needed because the
