@@ -37,9 +37,15 @@ export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Pro
 }
 
 /**
- * Start a keep-alive WebSocket connection
+ * Start a keep-alive WebSocket connection in Hardhat.
  *
- * https://github.com/ethers-io/ethers.js/issues/1053#issuecomment-808736570
+ * Usage:
+ *
+ *   startConnection(hre, async (hre, provider) => {
+ *     // Your code here
+ *   }
+ *
+ * Source: https://github.com/ethers-io/ethers.js/issues/1053#issuecomment-808736570
  */
 export function startConnection(
   hre: HardhatRuntimeEnvironment,
