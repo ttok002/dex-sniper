@@ -3,7 +3,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
 import './tasks/index';
 import { getenv } from './src/common/dotenv';
-import { accounts, getNetworkAccounts } from './src/common/config';
+import { getNetworkAccounts } from './src/common/config';
 
 /**
  * Configuration for Harhat

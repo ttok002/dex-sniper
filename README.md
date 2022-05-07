@@ -9,7 +9,7 @@ Snipe liquidity on popular decentralized exchanges.
 1. Run `npm install` in the project's directory.
 1. Copy _.env.example_ in _.env._.
 1. Configure _.env_.
-1. Run `npx hardhat` to see the available commands.
+1. Run `npx hardhat` in the project's directory to see the available commands.
 
 # Examples
 
