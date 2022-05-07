@@ -1,10 +1,11 @@
 import { Provider } from '@ethersproject/providers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { URL } from 'url';
-import { logger, LOGGING, onProviderDebug } from '../common/logger';
+import { debug, LOG_LEVEL, LOG_REQUESTS, LOG_RESPONSES, warn } from '../common/logger';
 import { WebSocketProvider } from '@ethersproject/providers';
 import { getenv } from '../common/dotenv';
 import { getSafeUrl } from './general';
+import { onProviderDebug } from './logger';
 
 /**
  * Return either an HTTP Provider or a WebSocket provider
@@ -12,7 +13,7 @@ import { getSafeUrl } from './general';
  */
 export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Provider {
   const url = new URL((network as any).config.url);
-  logger.debug(`> Node: ${getSafeUrl(url)}`);
+  debug(`> Node: ${getSafeUrl(url)}`);
   let provider: Provider;
   switch (url.protocol) {
     case 'http:':
@@ -30,8 +31,8 @@ export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Pro
       throw new Error(`Network URL not valid: '${url.href}'`);
   }
   // Debug
-  if (LOGGING) {
-    provider.on('debug', onProviderDebug);
+  if (LOG_LEVEL) {
+    provider.on('debug', (info) => onProviderDebug(info, LOG_REQUESTS, LOG_RESPONSES));
   }
   return provider;
 }
@@ -60,7 +61,7 @@ export function startConnection(
 
   provider._websocket.on('open', () => {
     keepAliveInterval = setInterval(() => {
-      logger.debug('> Checking if the connection is alive, sending a ping');
+      debug('> Checking if the connection is alive, sending a ping');
       provider._websocket.ping();
       // Delay should be equal to the interval at which your server
       // sends out pings plus a conservative assumption of the latency.
@@ -73,14 +74,14 @@ export function startConnection(
   });
 
   provider._websocket.on('close', () => {
-    logger.warn('> WARNING: The websocket connection was closed');
+    warn('> WARNING: The websocket connection was closed');
     clearInterval(keepAliveInterval);
     clearTimeout(pingTimeout);
     startConnection(hre, onOpen);
   });
 
   provider._websocket.on('pong', () => {
-    logger.debug('> Received pong, so connection is alive, clearing the timeout');
+    debug('> Received pong, so connection is alive, clearing the timeout');
     clearInterval(pingTimeout);
   });
 }

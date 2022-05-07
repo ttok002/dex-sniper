@@ -1,60 +1,107 @@
 import { LogLevel } from '@ethersproject/logger';
-import { ethers } from 'ethers';
-import { getenv } from './dotenv';
+import { getenv, SCRIPT_PATH } from './dotenv';
+import path from 'path';
+import { createLoggerObject, createWriteStream, writeLogLine } from '../helpers/logger';
 
-export const LOGGING = getenv('LOGGING', 'OFF') as LogLevel;
-export const LOG_REQUESTS = parseInt(getenv('LOG_REQUESTS', '0'), 10);
-export const LOG_RESPONSES = parseInt(getenv('LOG_RESPONSES', '0'), 10);
+/**
+ * Log level: DEBUG, INFO, WARN, ERROR, OFF
+ */
+export const LOG_LEVEL: LogLevel = getenv('LOG_LEVEL', 'OFF') as LogLevel;
 
-const Logger = ethers.utils.Logger;
+/**
+ * Whether or not to log to screen
+ */
+export const LOG_TO_SCREEN: boolean = parseInt(getenv('LOG_TO_SCREEN', '1'), 10) !== 0;
 
-Logger.setLogLevel(LOGGING ? LOGGING : Logger.levels.OFF);
+/**
+ * Whether or not to log to file
+ */
+export const LOG_TO_FILE: boolean = parseInt(getenv('LOG_TO_FILE', '1'), 10) !== 0;
 
-export const logger = new ethers.utils.Logger('v1.0');
+/**
+ * Directory where to dump logs
+ */
+export const LOG_DIR: string = getenv('LOG_DIR', path.resolve(SCRIPT_PATH, 'storage', 'logs'));
 
-export function info(...args: any[]) {
-  LOGGING && logger.info(args);
-}
+/**
+ * Whether or not to log requests made by ethers.js provider
+ */
+export const LOG_REQUESTS: number = parseInt(getenv('LOG_REQUESTS', '0'), 10);
 
-export function debug(...args: any[]) {
-  LOGGING && logger.debug(args);
-}
+/**
+ * Whether or not to log responses received by ethers.js provider
+ */
+export const LOG_RESPONSES: number = parseInt(getenv('LOG_RESPONSES', '0'), 10);
 
-export function warn(...args: any[]) {
-  LOGGING && logger.warn(args);
+/**
+ * Export default logger object
+ */
+export const ethersLogger = createLoggerObject(LOG_LEVEL);
+
+/**
+ * Export default output stream
+ */
+export const fileLogger = LOG_TO_FILE && createWriteStream(path.resolve(LOG_DIR, 'app.log'));
+
+/**
+ * Log info message
+ */
+export function info(...args: any[]): void {
+  if (LOG_TO_SCREEN) {
+    ethersLogger.info(...args);
+  }
+  if (fileLogger && shouldLog('INFO')) {
+    writeLogLine(fileLogger, ...args);
+  }
 }
 
 /**
- * What to do when the provider makes a request or
- * receives a response
+ * Log debug message
  */
-export function onProviderDebug(info: Record<string, any>) {
-  // Log requests
-  if (info.action === 'request') {
-    switch (LOG_REQUESTS) {
-      case 1:
-        console.log(`> Request ${info.request.method}`);
-        break;
-      case 2:
-        console.log('> Request');
-        console.log(info.request);
-        break;
-      default:
-        break;
-    }
+export function debug(...args: any[]) {
+  if (LOG_TO_SCREEN) {
+    ethersLogger.debug(...args);
   }
-  // Log responses
-  else if (info.action === 'response') {
-    switch (LOG_RESPONSES) {
-      case 1:
-        console.log(`> Response`);
-        console.log(info.response);
-        break;
-      default:
-        break;
-    }
-  } else {
-    console.log(`Unknown debug type ${info.action}`);
-    console.log(info);
+  if (fileLogger && shouldLog('DEBUG')) {
+    writeLogLine(fileLogger, ...args);
   }
 }
+
+/**
+ * Log warning message
+ */
+export function warn(...args: any[]) {
+  if (LOG_TO_SCREEN) {
+    ethersLogger.warn(...args);
+  }
+  if (fileLogger && shouldLog('WARNING')) {
+    writeLogLine(fileLogger, ...args);
+  }
+}
+
+/**
+ * Log warning message
+ */
+export function warning(...args: any[]) {
+  warn(...args);
+}
+
+/**
+ * Return true if the given log level is going
+ * to be logged by the logger
+ */
+export function shouldLog(logLevel: string): boolean {
+  const logLevels = { DEBUG: 1, INFO: 2, WARNING: 3, ERROR: 4, OFF: 5 }; // copied from ethers.js
+  if (logLevels.hasOwnProperty(logLevel)) {
+    // @ts-ignore
+    return logLevels[LOG_LEVEL] <= logLevels[logLevel];
+  }
+  throw new Error(`Unrecognized log level '${logLevel}'`);
+}
+
+export default {
+  info,
+  debug,
+  warn,
+  warning,
+};
