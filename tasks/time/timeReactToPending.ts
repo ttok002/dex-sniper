@@ -22,7 +22,8 @@ task(
     1,
     types.int
   )
-  .setAction(async ({ account, addressToMonitor, nMax }, hre) => {
+  .addOptionalParam('gasLimit', 'Max gas to use in the reaction', 0, types.int)
+  .setAction(async ({ account, addressToMonitor, nMax, gasLimit }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -88,7 +89,11 @@ task(
         'out',
         `triggered by ${inboundTxHash.substring(0, 7)}`,
       ]);
-      const outboundTx = await signer.sendTransaction({ to: self, value: 1 });
+      const outboundTx = await signer.sendTransaction({
+        to: self,
+        value: 1,
+        gasLimit: gasLimit ? gasLimit : undefined,
+      });
       // Update tracker with tx hash
       txTracker.update(outboundTxLogId, outboundTx.hash);
       txTracker.addTiming(outboundTxLogId, 'sent');
