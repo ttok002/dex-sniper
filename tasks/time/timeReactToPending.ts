@@ -1,7 +1,7 @@
 import { task, types } from 'hardhat/config';
 import { exit } from 'process';
 import { wait } from '../../src/helpers/general';
-import { prettyPrint, printTxResponse } from '../../src/helpers/print';
+import { prepare, prettyPrint, printTxResponse } from '../../src/helpers/print';
 import { getProvider } from '../../src/helpers/providers';
 import { getSigner } from '../../src/helpers/signers';
 import { isResponseFrom, isResponsePending } from '../../src/helpers/transactions';
@@ -23,7 +23,13 @@ task(
     types.int
   )
   .addOptionalParam('gasLimit', 'Max gas to use in the reaction', 0, types.int)
-  .setAction(async ({ account, addressToMonitor, nMax, gasLimit }, hre) => {
+  .addOptionalParam(
+    'fastNonce',
+    'Keep track of nonce internally for faster performance. Do not sign txs while the script is running, lest you mess the nonce count',
+    false,
+    types.boolean
+  )
+  .setAction(async ({ account, addressToMonitor, nMax, gasLimit, fastNonce }, hre) => {
     // Transaction logger
     const txTracker = new TxTracker();
     // Counter of outbound transactions
@@ -53,6 +59,12 @@ task(
     const provider = getProvider(hre);
     const signer = getSigner(hre, account, provider);
     const self = await signer.getAddress();
+    // Get initial nonce
+    let nonce: number;
+    if (fastNonce) {
+      nonce = await signer.getTransactionCount();
+      prettyPrint('Initial nonce set', prepare({ nonce }));
+    }
     // Listen to tx
     provider.on('pending', async (inboundTxHash) => {
       // Log & fetch pending transaction
@@ -84,7 +96,10 @@ task(
       txTracker.addTag(inboundTxLogId, 'valid');
       printTxResponse(inboundTx, 'Received tx!', [['iteration', n]]);
       // React immediately by sending 1 gwei
-      prettyPrint(`Reacting to ${inboundTxHash.substring(0, 7)}...`, [['iteration', n]]);
+      prettyPrint(`Reacting to ${inboundTxHash.substring(0, 7)}...`, [
+        ['iteration', n],
+        ['nonce', nonce],
+      ]);
       const outboundTxLogId = txTracker.add('', [
         'out',
         `triggered by ${inboundTxHash.substring(0, 7)}`,
@@ -93,7 +108,12 @@ task(
         to: self,
         value: 1,
         gasLimit: gasLimit ? gasLimit : undefined,
+        nonce: fastNonce ? nonce : undefined,
       });
+      // Increment nonce
+      if (fastNonce) {
+        nonce += 1;
+      }
       // Update tracker with tx hash
       txTracker.update(outboundTxLogId, outboundTx.hash);
       txTracker.addTiming(outboundTxLogId, 'sent');
