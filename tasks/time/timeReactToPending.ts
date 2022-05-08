@@ -27,8 +27,9 @@ task(
     const txTracker = new TxTracker();
     // Counter of outbound transactions
     let n = 0;
-    // Print a summary on exit
-    process.on('SIGINT', printReport);
+    /**
+     * Print summary of in & out transactions
+     */
     async function printReport() {
       const txsToKeep = await TxTracker.fetchReceipts(
         txTracker.getTxsByTag(['valid', 'out']),
@@ -41,8 +42,12 @@ task(
           `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.tags}] `,
         ])
       );
-      exit(1);
     }
+    // Print summary on exit
+    process.on('SIGINT', async () => {
+      await printReport();
+      exit(1);
+    });
     // Get signer
     const provider = getProvider(hre);
     const signer = getSigner(hre, account, provider);
@@ -71,14 +76,10 @@ task(
       n += 1;
       // Avoid falling in an unpleasant infinite loop
       if (n > nMax) {
-        prettyPrint(`Reached nMax, won't react`, [
-          ['pending tx', inboundTxHash.substring(0, 7)],
-          ['iteration', n],
-          ['nMax', nMax],
-        ]);
         provider.removeAllListeners();
         return;
       }
+      // Transaction is valid!
       txTracker.addTag(inboundTxLogId, 'valid');
       printTxResponse(inboundTx, 'Received tx!', [['iteration', n]]);
       // React immediately by sending 1 gwei
@@ -88,9 +89,15 @@ task(
         `triggered by ${inboundTxHash.substring(0, 7)}`,
       ]);
       const outboundTx = await signer.sendTransaction({ to: self, value: 1 });
+      // Update tracker with tx hash
       txTracker.update(outboundTxLogId, outboundTx.hash);
       txTracker.addTiming(outboundTxLogId, 'sent');
       printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
+      // Print report after last tx
+      if (n == nMax) {
+        await printReport();
+        exit(1);
+      }
     });
     return wait();
   });
