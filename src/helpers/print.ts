@@ -1,6 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
-import { ethers, logger } from 'ethers';
+import { ethers } from 'ethers';
+import { info } from '../common/logger';
 import { TransactionDescription } from 'ethers/lib/utils';
 
 /**
@@ -170,7 +171,7 @@ export function prettyPrint(
   lines: [string, any][] = [],
   nPadding: number = 4
 ): void {
-  logger.info(buildPrettyPrint(title, lines, nPadding));
+  info('\n' + buildPrettyPrint(title, lines, nPadding));
 }
 
 /**

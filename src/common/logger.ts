@@ -51,7 +51,7 @@ export function info(...args: any[]): void {
     ethersLogger.info(...args);
   }
   if (fileLogger && shouldLog('INFO')) {
-    writeLogLine(fileLogger, ...args);
+    writeLogLine(fileLogger, '[INFO]', ...args);
   }
 }
 
@@ -63,7 +63,7 @@ export function debug(...args: any[]) {
     ethersLogger.debug(...args);
   }
   if (fileLogger && shouldLog('DEBUG')) {
-    writeLogLine(fileLogger, ...args);
+    writeLogLine(fileLogger, '[DEBUG]', ...args);
   }
 }
 
@@ -75,7 +75,7 @@ export function warn(...args: any[]) {
     ethersLogger.warn(...args);
   }
   if (fileLogger && shouldLog('WARNING')) {
-    writeLogLine(fileLogger, ...args);
+    writeLogLine(fileLogger, ['WARNING'], ...args);
   }
 }
 

@@ -51,11 +51,11 @@ export function onProviderDebug(
   if (info.action === 'request') {
     switch (logRequests) {
       case 1:
-        logger.info(`> Request ${info.request.method}`);
+        logger.debug(`> Request ${info.request.method}`);
         break;
       case 2:
-        logger.info('> Request');
-        logger.info(info.request);
+        logger.debug('> Request');
+        logger.debug(info.request);
         break;
       default:
         break;
@@ -65,14 +65,14 @@ export function onProviderDebug(
   else if (info.action === 'response') {
     switch (logResponses) {
       case 1:
-        logger.info(`> Response`);
-        logger.info(info.response);
+        logger.debug(`> Response`);
+        logger.debug(info.response);
         break;
       default:
         break;
     }
   } else {
-    logger.info(`Unknown debug type ${info.action}`);
-    logger.info(info);
+    logger.debug(`Unknown debug type ${info.action}`);
+    logger.debug(info);
   }
 }
