@@ -44,3 +44,4 @@ import './time/timeGetProvider';
 import './time/timeGetLatestBlock';
 import './time/timeGetPendingTransaction';
 import './time/timeReactToPending';
+import './time/timeGetNonce';
