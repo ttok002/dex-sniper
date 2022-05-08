@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract-provider';
 import { ethers } from 'ethers';
 import { info } from '../common/logger';
-import { TransactionDescription } from 'ethers/lib/utils';
+import { formatUnits, TransactionDescription } from 'ethers/lib/utils';
 
 /**
  * Pretty print a Swap event; suitable to
@@ -91,8 +91,8 @@ export function printTxReceipt(
     ['to', tx.to],
     ['from', tx.from],
     ['block', tx.blockNumber],
-    ['Transaction Fee', `${ethers.utils.formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`],
-    ['effectiveGasPrice', `${ethers.utils.formatUnits(tx.effectiveGasPrice, 9)} gwei`],
+    ['Transaction Fee', `${formatUnits(tx.effectiveGasPrice.mul(tx.gasUsed))} ETH`],
+    ['effectiveGasPrice', `${formatUnits(tx.effectiveGasPrice, 9)} gwei`],
     ['gasUsed', tx.gasUsed],
     ['cumulativeGasUsed', tx.cumulativeGasUsed],
     ['type', `${type} (${tx.type})`],
