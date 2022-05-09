@@ -12,8 +12,9 @@ task('utils:sendEth', 'Send some ETH to the give address')
   .addOptionalParam('n', 'How many times to send ETH', 1, types.int)
   .addOptionalParam('delay', 'Delay in milliseconds between each send', 0, types.int)
   .setAction(async ({ to, valueInEth, account, gasLimit, n, delay }, hre) => {
+    const signer = getSigner(hre, account);
     if (!to) {
-      to = await getSigner(hre, account).getAddress();
+      to = await signer.getAddress();
     }
     const params: TransactionRequest = {
       to: to,
@@ -25,7 +26,7 @@ task('utils:sendEth', 'Send some ETH to the give address')
     prettyPrint('Params', prepare(params));
     return new Promise(async (resolve) => {
       for (let i = 0; i < n; i++) {
-        const txRes = await getSigner(hre, account).sendTransaction(params);
+        const txRes = await signer.sendTransaction(params);
         if (delay && i > 0) {
           prettyPrint(`Waiting ${delay} ms...`);
           await sleep(delay);

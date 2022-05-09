@@ -42,7 +42,7 @@ task(
       // Counter of outbound transactions
       let n = 0;
       /**
-       * Print summary of in & out transactions
+       * Function to print summary of in & out transactions
        */
       async function printReport() {
         const txsToKeep = await TxTracker.fetchReceipts(
@@ -121,13 +121,13 @@ task(
             ? parseUnits(maxPriorityFeePerGas + '', 'gwei')
             : undefined,
         });
+        // Update tracker with tx timing & hash
+        txTracker.addTiming(outboundTxLogId, 'sent');
+        txTracker.update(outboundTxLogId, outboundTx.hash);
         // Increment nonce
         if (fastNonce) {
           nonce += 1;
         }
-        // Update tracker with tx hash
-        txTracker.update(outboundTxLogId, outboundTx.hash);
-        txTracker.addTiming(outboundTxLogId, 'sent');
         printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
         // Print report after last tx
         if (n == nMax) {
