@@ -18,12 +18,13 @@ export function getProvider({ network, ethers }: HardhatRuntimeEnvironment): Pro
   switch (url.protocol) {
     case 'http:':
     case 'https:':
-      provider = new ethers.providers.JsonRpcProvider({
+      provider = new ethers.providers.StaticJsonRpcProvider({
         url: url.href,
         user: getenv('BASICAUTH_USER'),
         password: getenv('BASICAUTH_PASSWORD'),
       });
       break;
+    case 'ws:':
     case 'wss:':
       provider = new ethers.providers.WebSocketProvider(url.href);
       break;
