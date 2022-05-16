@@ -8,8 +8,9 @@ import { getSigner } from '../../src/helpers/signers';
 import { isResponseFrom, isResponsePending } from '../../src/helpers/transactions';
 import { TxTracker } from '../../src/tracking/TxTracker';
 import WebSocket from 'ws';
-import { TransactionResponse } from '@ethersproject/abstract-provider';
+import { TransactionRequest, TransactionResponse } from '@ethersproject/abstract-provider';
 import { debug } from '../../src/common/logger';
+import axios from 'axios';
 
 task(
   'time:reactToPendingSnowSight',
@@ -88,8 +89,8 @@ task(
       ssWs.on('message', async (data: string) => {
         // Log & fetch pending transaction
         const inboundTx = JSON.parse(data) as TransactionResponse;
-        if ((inboundTx as any).status === 'authenticated') {
-          debug(`> SnowSight Websocket authenticated`);
+        if ((inboundTx as any).status) {
+          debug(`> SnowSight Websocket authentication: ${(inboundTx as any).status}`);
         }
         const inboundTxHash = inboundTx.hash;
         const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
@@ -120,24 +121,37 @@ task(
           'out',
           `triggered by ${inboundTxHash.substring(0, 7)}`,
         ]);
-        const outboundTx = await signer.sendTransaction({
+        // Build and sign transaction
+        const txRequest: TransactionRequest = {
+          from: self,
           to: self,
+          nonce: fastNonce ? nonce : await signer.getTransactionCount(),
           value: 1,
-          gasLimit: gasLimit ? gasLimit : undefined,
-          nonce: fastNonce ? nonce : undefined,
-          maxFeePerGas: maxFeePerGas ? parseUnits(maxFeePerGas + '', 'gwei') : undefined,
+          maxFeePerGas: maxFeePerGas
+            ? parseUnits(maxFeePerGas + '', 'gwei')
+            : parseUnits('200', 'gwei'), // TODO: Estimate from latest block
           maxPriorityFeePerGas: maxPriorityFeePerGas
             ? parseUnits(maxPriorityFeePerGas + '', 'gwei')
-            : undefined,
-        });
+            : parseUnits('2.5', 'gwei'),
+          gasLimit: 26000,
+          chainId: 43114,
+          type: 2,
+        };
+        // Send TX using the propagator
+        const signedTx = await signer.signTransaction(txRequest);
+        const packet = { signed_key: ssSignedKey, raw_tx: signedTx };
+        const ssResponse = await axios.post(
+          'http://tx-propagator.snowsight.chainsight.dev:8081',
+          JSON.stringify(packet)
+        );
         // Update tracker with tx timing & hash
         txTracker.addTiming(outboundTxLogId, 'sent');
-        txTracker.update(outboundTxLogId, outboundTx.hash);
+        txTracker.update(outboundTxLogId, inboundTxHash); // TODO: how do we get the outboundTxHash?
         // Increment nonce
         if (fastNonce) {
           nonce += 1;
         }
-        printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
+        // printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
         // Print report after last tx
         if (n == nMax) {
           await printReport();

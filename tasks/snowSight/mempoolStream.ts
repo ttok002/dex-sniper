@@ -25,8 +25,8 @@ task(
     // Stream pending transactions
     ws.on('message', async (data: string) => {
       const txResponse = JSON.parse(data);
-      if (txResponse.status === 'authenticated') {
-        console.log('Snowsight::authenticated');
+      if (txResponse.status) {
+        console.log(`Snowsight::authentication: ${txResponse.status}`);
       }
       console.log(txResponse);
     });
