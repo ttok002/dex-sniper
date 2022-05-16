@@ -154,6 +154,7 @@ task(
         }
         prettyPrint(`Reaction to ${inboundTxHash.substring(0, 7)}`, [
           ['hash', outboundTxHash],
+          ['Signed TX', signedTx],
           ['SnowSight status', ssResponse.status],
           ['SnowSight response', JSON.stringify(ssResponse.data)],
         ]);
