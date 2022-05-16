@@ -49,3 +49,4 @@ import './time/timeGetNonce';
 
 // SnowSight
 import './snowSight/mempoolStream';
+import './snowSight/propagateTx';
