@@ -145,13 +145,18 @@ task(
           JSON.stringify(packet)
         );
         // Update tracker with tx timing & hash
+        const outboundTxHash = keccak256(signedTx);
         txTracker.addTiming(outboundTxLogId, 'sent');
-        txTracker.update(outboundTxLogId, keccak256(signedTx));
+        txTracker.update(outboundTxLogId, outboundTxHash);
         // Increment nonce
         if (fastNonce) {
           nonce += 1;
         }
-        // printTxResponse(outboundTx, `Reaction to ${inboundTxHash.substring(0, 7)}`);
+        prettyPrint(`Reaction to ${inboundTxHash.substring(0, 7)}`, [
+          ['hash', outboundTxHash],
+          ['SnowSight status', ssResponse.status],
+          ['SnowSight response', JSON.stringify(ssResponse.data)],
+        ]);
         // Print report after last tx
         if (n == nMax) {
           await printReport();
