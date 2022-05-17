@@ -9,7 +9,7 @@ import { isResponseFrom, isResponsePending } from '../../src/helpers/transaction
 import { TxTracker } from '../../src/tracking/TxTracker';
 import WebSocket from 'ws';
 import { TransactionRequest, TransactionResponse } from '@ethersproject/abstract-provider';
-import { debug } from '../../src/common/logger';
+import logger, { debug } from '../../src/common/logger';
 import axios from 'axios';
 
 task(
@@ -36,9 +36,19 @@ task(
     false,
     types.boolean
   )
+  .addOptionalParam('timeoutInMs', 'Timeout for the TX propagator', 500, types.int)
   .setAction(
     async (
-      { account, addressToMonitor, nMax, gasLimit, maxFeePerGas, maxPriorityFeePerGas, fastNonce },
+      {
+        account,
+        addressToMonitor,
+        nMax,
+        gasLimit,
+        maxFeePerGas,
+        maxPriorityFeePerGas,
+        fastNonce,
+        timeoutInMs,
+      },
       hre
     ) => {
       // Transaction logger
@@ -117,10 +127,6 @@ task(
           ['iteration', n],
           ['nonce', nonce],
         ]);
-        const outboundTxLogId = txTracker.add('', [
-          'out',
-          `triggered by ${inboundTxHash.substring(0, 7)}`,
-        ]);
         // Build and sign transaction
         const txRequest: TransactionRequest = {
           from: self,
@@ -137,13 +143,30 @@ task(
           chainId: 43114,
           type: 2,
         };
+        const outboundTxLogId = txTracker.add('', [
+          'out',
+          `triggered by ${inboundTxHash.substring(0, 7)}`,
+        ]);
         // Send TX using the propagator
         const signedTx = await signer.signTransaction(txRequest);
         const packet = { signed_key: ssSignedKey, raw_tx: signedTx };
-        const ssResponse = await axios.post(
-          'http://tx-propagator.snowsight.chainsight.dev:8081',
-          JSON.stringify(packet)
-        );
+        let ssResponse;
+        try {
+          ssResponse = await axios({
+            method: 'post',
+            url: 'http://tx-propagator.snowsight.chainsight.dev:8081',
+            timeout: timeoutInMs,
+            data: JSON.stringify(packet),
+          });
+        } catch (error) {
+          prettyPrint(`SnowSight error!`, [
+            ['error name', (error as Error).name],
+            ['error message', (error as Error).message],
+            ['triggered by', inboundTxHash.substring(0, 7)],
+          ]);
+          txTracker.addTiming(outboundTxLogId, 'errored');
+          return;
+        }
         // Update tracker with tx timing & hash
         const outboundTxHash = keccak256(signedTx);
         txTracker.addTiming(outboundTxLogId, 'sent');
