@@ -9,7 +9,7 @@ import { isResponseFrom, isResponsePending } from '../../src/helpers/transaction
 import { TxTracker } from '../../src/tracking/TxTracker';
 import WebSocket from 'ws';
 import { TransactionRequest, TransactionResponse } from '@ethersproject/abstract-provider';
-import logger, { debug } from '../../src/common/logger';
+import { debug } from '../../src/common/logger';
 import axios from 'axios';
 
 task(
@@ -36,7 +36,7 @@ task(
     false,
     types.boolean
   )
-  .addOptionalParam('timeoutInMs', 'Timeout for the TX propagator', 500, types.int)
+  .addOptionalParam('timeout', 'Timeout for the TX propagator, in milliseconds', 500, types.int)
   .setAction(
     async (
       {
@@ -47,7 +47,7 @@ task(
         maxFeePerGas,
         maxPriorityFeePerGas,
         fastNonce,
-        timeoutInMs,
+        timeout,
       },
       hre
     ) => {
@@ -155,7 +155,7 @@ task(
           ssResponse = await axios({
             method: 'post',
             url: 'http://tx-propagator.snowsight.chainsight.dev:8081',
-            timeout: timeoutInMs,
+            timeout: timeout,
             data: JSON.stringify(packet),
           });
         } catch (error) {
