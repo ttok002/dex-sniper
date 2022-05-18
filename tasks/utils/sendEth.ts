@@ -1,4 +1,6 @@
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { BigNumber } from 'ethers';
+import { formatUnits } from 'ethers/lib/utils';
 import { task, types } from 'hardhat/config';
 import { sleep } from '../../src/helpers/general';
 import { prepare, prettyPrint, printTxReceipt } from '../../src/helpers/print';
@@ -12,14 +14,16 @@ task('utils:sendEth', 'Send some ETH to the give address')
   .addOptionalParam('delay', 'Delay in milliseconds between each send', 0, types.int)
   .setAction(async ({ to, valueInEth, account, n, delay }, hre) => {
     const signer = getSigner(hre, account);
+    const value = hre.ethers.utils.parseEther(valueInEth);
     if (!to) {
       to = await signer.getAddress();
     }
     const params: TransactionRequest = {
       to: to,
-      value: hre.ethers.utils.parseEther(valueInEth),
+      value: value,
     };
     prettyPrint('Params', prepare(params));
+    let ethSpent = BigNumber.from(0);
     return new Promise(async (resolve) => {
       for (let i = 0; i < n; i++) {
         const txRes = await signer.sendTransaction(params);
@@ -29,7 +33,9 @@ task('utils:sendEth', 'Send some ETH to the give address')
         }
         const txReceipt = await txRes.wait();
         printTxReceipt(txReceipt, undefined, undefined, n > 1 ? [['n', i + 1]] : undefined);
+        ethSpent = ethSpent.add(txReceipt.effectiveGasPrice.mul(txReceipt.gasUsed)).add(value);
       }
+      prettyPrint('Total ETH spent', [['ETH', formatUnits(ethSpent)]]);
       resolve(n);
     });
   });
