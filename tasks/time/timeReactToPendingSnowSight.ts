@@ -67,7 +67,7 @@ task(
           'Transactions summary',
           txsToKeep.map((tx) => [
             tx.hash,
-            `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.tags}] `,
+            `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.meta.tags}] `,
           ])
         );
       }
@@ -103,7 +103,7 @@ task(
           debug(`> SnowSight Websocket authentication: ${(inboundTx as any).status}`);
         }
         const inboundTxHash = inboundTx.hash;
-        const inboundTxLogId = txTracker.add(inboundTxHash, ['in']);
+        const inboundTxLogId = txTracker.addWithTags(inboundTxHash, ['in', inboundTxHash]);
         if (!inboundTx) {
           prettyPrint('Empty pending transaction!');
           return;
@@ -143,10 +143,7 @@ task(
           chainId: 43114,
           type: 2,
         };
-        const outboundTxLogId = txTracker.add('', [
-          'out',
-          `triggered by ${inboundTxHash.substring(0, 7)}`,
-        ]);
+        const outboundTxLogId = txTracker.addWithTags('', ['out', inboundTxHash]);
         // Send TX using the propagator
         const signedTx = await signer.signTransaction(txRequest);
         const packet = { signed_key: ssSignedKey, raw_tx: signedTx };
@@ -182,7 +179,7 @@ task(
           ['SnowSight response', JSON.stringify(ssResponse.data)],
         ]);
         // Print report after last tx
-        if (n == nMax) {
+        if (n >= nMax) {
           await printReport();
           exit(1);
         }

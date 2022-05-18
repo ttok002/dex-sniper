@@ -17,18 +17,21 @@ export class TxTracker {
    * Optionally, set doubleCheck=true not to add the transaction if it
    * already exists in the log.
    *
-   * @returns {number} The ID of the added tx in the log,
-   * 0 if the tx was not added.
+   * @returns {number} The ID of the added tx in the log. If doubleCheck=true,
+   * returns 0 if the tx was not added.
    */
-  add(txHash: string, tags: string[] = [], doubleCheck = false): number {
+  add(txHash: string, meta: Record<string, any> = {}, doubleCheck = false): number {
     if (doubleCheck && this.findTx(txHash)) {
       return 0;
+    }
+    if (!meta.tags) {
+      meta.tags;
     }
     const id = this.txs.length + 1;
     this.txs.push({
       id: id,
       hash: txHash,
-      tags,
+      meta: Object.assign({}, { tags: [] as string[] }, meta),
       timings: [],
     });
     this.addTiming(id, 'start');
@@ -36,16 +39,24 @@ export class TxTracker {
   }
 
   /**
-   * Update the hash and tags of the given transaction; does
-   * not fetch the tx receipt.
+   * Log a transaction, with tags attached.
    */
-  update(id: number, txHash: string | null = null, tags: string[] | null = null) {
+  addWithTags(txHash: string, tags: string[] = [], doubleCheck = false): number {
+    return this.add(txHash, { tags }, doubleCheck);
+  }
+
+  /**
+   * Update the hash and meta of the given transaction.
+   *
+   * It does not re-fetch the tx receipt.
+   */
+  update(id: number, txHash: string | null = null, meta: Record<string, any> | null = null) {
     const tx = this.getTx(id);
     if (txHash) {
       tx.hash = txHash;
     }
-    if (tags) {
-      tx.tags = tags;
+    if (meta) {
+      tx.meta = meta;
     }
     return tx;
   }
@@ -79,8 +90,8 @@ export class TxTracker {
    */
   addTag(id: number, tag: string): string[] {
     const tx = this.getTx(id);
-    tx.tags.push(tag);
-    return tx.tags;
+    tx.meta.tags.push(tag);
+    return tx.meta.tags;
   }
 
   /**
@@ -105,7 +116,7 @@ export class TxTracker {
    * Return the tags of the given transaction
    */
   getTags(id: number): string[] {
-    return this.getTx(id).tags;
+    return this.getTx(id).meta.tags;
   }
 
   /**
@@ -147,20 +158,28 @@ export class TxTracker {
   }
 
   /**
-   * Return all txs with the given tags,
+   * Return all txs with the given meta,
    * preserving order
    */
-  getTxsByTag(tags: string[]) {
+  getTxsByMeta(key: string, values: any[]): LogTx[] {
     const allTxs = this.getAllTxs();
     const filteredTxs: LogTx[] = [];
     for (let i = 0; i < allTxs.length; i++) {
       const tx = allTxs[i];
-      const intersection = tags.filter((tag) => tx.tags.includes(tag));
+      const intersection = values.filter((v) => tx.meta[key].includes(v));
       if (intersection.length) {
         filteredTxs.push(tx);
       }
     }
     return filteredTxs;
+  }
+
+  /**
+   * Return all txs with the given tags,
+   * preserving order
+   */
+  getTxsByTag(tags: string[]): LogTx[] {
+    return this.getTxsByMeta('tags', tags);
   }
 
   /**

@@ -3,7 +3,7 @@ import { TransactionReceipt, TransactionResponse } from '@ethersproject/abstract
 export interface LogTx {
   id: number; // internal id in the log
   hash: string;
-  tags: string[];
+  meta: Record<string, any>;
   blockNumber?: number;
   timings: TxTiming[];
   receipt?: TransactionReceipt;

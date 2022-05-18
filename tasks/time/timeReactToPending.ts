@@ -53,7 +53,7 @@ task(
           'Transactions summary',
           txsToKeep.map((tx) => [
             tx.hash,
-            `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.tags}] `,
+            `${tx.blockNumber} timings=[${txTracker.formatTimings(tx.id)}] tags=[${tx.meta.tags}] `,
           ])
         );
       }
