@@ -45,19 +45,22 @@ task(
   .addOptionalParam('timeout', 'Timeout for the TX propagator, in milliseconds', 500, types.int)
   .setAction(
     async (
-      {
-        account,
-        addressToMonitor,
-        nMax,
-        useTxPropagator,
-        gasLimit,
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-        fastNonce,
-        timeout,
+      args: {
+        account: string;
+        addressToMonitor: string;
+        nMax: number;
+        useTxPropagator: boolean;
+        gasLimit: number;
+        maxFeePerGas: number;
+        maxPriorityFeePerGas: number;
+        fastNonce: boolean;
+        timeout: number;
       },
       hre
     ) => {
+      // Parse parameters
+      prettyPrint('Arguments', prepare(args));
+      const { account, addressToMonitor, nMax, useTxPropagator, gasLimit, maxFeePerGas, maxPriorityFeePerGas,fastNonce, timeout } = args; // prettier-ignore
       // Transaction logger
       const txTracker = new TxTracker();
       // Counter of outbound transactions
