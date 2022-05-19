@@ -1,4 +1,4 @@
-import { keccak256, parseUnits } from 'ethers/lib/utils';
+import { parseUnits } from 'ethers/lib/utils';
 import { task, types } from 'hardhat/config';
 import { exit } from 'process';
 import { wait } from '../../src/helpers/general';
@@ -165,7 +165,7 @@ task(
           return;
         }
         // Update tracker with tx timing & hash
-        const outboundTxHash = keccak256(signedTx);
+        const outboundTxHash = ssResponse.data.hash;
         txTracker.addTiming(outboundTxLogId, 'sent');
         txTracker.update(outboundTxLogId, outboundTxHash);
         // Increment nonce
