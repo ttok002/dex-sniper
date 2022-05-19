@@ -21,6 +21,12 @@ task(
     'addressToMonitor',
     "Address to monitor. If qual to 'account', make sure you set a low enough value for nMax to avoid infinite loops."
   )
+  .addParam(
+    'useTxPropagator',
+    'Whether to send TXs using SnowSight TX propagator (true) or the provider (false)',
+    undefined,
+    types.boolean
+  )
   .addOptionalParam(
     'nMax',
     'Stop listening after nMax transactions (to avoid infinite loops)',
@@ -43,6 +49,7 @@ task(
         account,
         addressToMonitor,
         nMax,
+        useTxPropagator,
         gasLimit,
         maxFeePerGas,
         maxPriorityFeePerGas,
@@ -144,40 +151,58 @@ task(
           type: 2,
         };
         const outboundTxLogId = txTracker.addWithTags('', ['out', inboundTxHash]);
+        let outboundTxHash;
         // Send TX using the propagator
-        const signedTx = await signer.signTransaction(txRequest);
-        const packet = { signed_key: ssSignedKey, raw_tx: signedTx };
-        let ssResponse;
-        try {
-          ssResponse = await axios({
-            method: 'post',
-            url: 'http://tx-propagator.snowsight.chainsight.dev:8081',
-            timeout: timeout,
-            data: JSON.stringify(packet),
-          });
-        } catch (error) {
-          prettyPrint(`SnowSight error!`, [
-            ['error name', (error as Error).name],
-            ['error message', (error as Error).message],
-            ['triggered by', inboundTxHash.substring(0, 7)],
+        if (useTxPropagator) {
+          const signedTx = await signer.signTransaction(txRequest);
+          const packet = { signed_key: ssSignedKey, raw_tx: signedTx };
+          let ssResponse;
+          try {
+            ssResponse = await axios({
+              method: 'post',
+              url: 'http://tx-propagator.snowsight.chainsight.dev:8081',
+              timeout: timeout,
+              data: JSON.stringify(packet),
+            });
+          } catch (error) {
+            prettyPrint(`SnowSight error!`, [
+              ['error name', (error as Error).name],
+              ['error message', (error as Error).message],
+              ['triggered by', inboundTxHash.substring(0, 7)],
+            ]);
+            txTracker.addTiming(outboundTxLogId, 'errored');
+            return;
+          }
+          outboundTxHash = ssResponse.data.hash;
+          prettyPrint(`Reaction to ${inboundTxHash.substring(0, 7)}`, [
+            ['hash', outboundTxHash],
+            ['Signed TX', `${signedTx.substring(0, 10)}...`],
+            ['SnowSight status', ssResponse.status],
+            ['SnowSight response', JSON.stringify(ssResponse.data)],
           ]);
-          txTracker.addTiming(outboundTxLogId, 'errored');
-          return;
+        }
+        // Send TX using provider
+        else {
+          const outboundTx = await signer.sendTransaction({
+            to: self,
+            value: 1,
+            gasLimit: gasLimit ? gasLimit : undefined,
+            nonce: fastNonce ? nonce : undefined,
+            maxFeePerGas: maxFeePerGas ? parseUnits(maxFeePerGas + '', 'gwei') : undefined,
+            maxPriorityFeePerGas: maxPriorityFeePerGas
+              ? parseUnits(maxPriorityFeePerGas + '', 'gwei')
+              : undefined,
+          });
+          outboundTxHash = outboundTx.hash;
+          prettyPrint(`Reaction to ${inboundTxHash.substring(0, 7)}`, [['hash', outboundTxHash]]);
         }
         // Update tracker with tx timing & hash
-        const outboundTxHash = ssResponse.data.hash;
         txTracker.addTiming(outboundTxLogId, 'sent');
         txTracker.update(outboundTxLogId, outboundTxHash);
         // Increment nonce
         if (fastNonce) {
           nonce += 1;
         }
-        prettyPrint(`Reaction to ${inboundTxHash.substring(0, 7)}`, [
-          ['hash', outboundTxHash],
-          ['Signed TX', `${signedTx.substring(0, 10)}...`],
-          ['SnowSight status', ssResponse.status],
-          ['SnowSight response', JSON.stringify(ssResponse.data)],
-        ]);
         // Print report after last tx
         if (n >= nMax) {
           await printReport();
