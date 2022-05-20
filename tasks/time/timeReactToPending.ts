@@ -1,7 +1,8 @@
 import { parseUnits } from 'ethers/lib/utils';
 import { task, types } from 'hardhat/config';
+import { basename } from 'path';
 import { exit } from 'process';
-import { wait } from '../../src/helpers/general';
+import { getHostname, wait } from '../../src/helpers/general';
 import { prepare, prettyPrint, printTxResponse } from '../../src/helpers/print';
 import { getProvider } from '../../src/helpers/providers';
 import { getSigner } from '../../src/helpers/signers';
@@ -34,9 +35,24 @@ task(
   )
   .setAction(
     async (
-      { account, addressToMonitor, nMax, gasLimit, maxFeePerGas, maxPriorityFeePerGas, fastNonce },
+      args: {
+        account: string;
+        addressToMonitor: string;
+        nMax: number;
+        gasLimit: number;
+        maxFeePerGas: number;
+        maxPriorityFeePerGas: number;
+        fastNonce: boolean;
+      },
       hre
     ) => {
+      // Parse parameters
+      prettyPrint('Arguments', [
+        ['host', getHostname()],
+        ['script', basename(__filename)],
+        ...prepare(args),
+      ]);
+      const {account, addressToMonitor, nMax, gasLimit, maxFeePerGas, maxPriorityFeePerGas, fastNonce} = args; // prettier-ignore
       // Transaction logger
       const txTracker = new TxTracker();
       // Counter of outbound transactions

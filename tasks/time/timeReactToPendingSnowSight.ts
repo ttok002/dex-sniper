@@ -1,7 +1,7 @@
 import { parseUnits } from 'ethers/lib/utils';
 import { task, types } from 'hardhat/config';
-import { exit } from 'process';
-import { wait } from '../../src/helpers/general';
+import { argv, exit } from 'process';
+import { getHostname, wait } from '../../src/helpers/general';
 import { prepare, prettyPrint, printTxResponse } from '../../src/helpers/print';
 import { getProvider } from '../../src/helpers/providers';
 import { getSigner } from '../../src/helpers/signers';
@@ -11,6 +11,7 @@ import WebSocket from 'ws';
 import { TransactionRequest, TransactionResponse } from '@ethersproject/abstract-provider';
 import { debug } from '../../src/common/logger';
 import axios from 'axios';
+import { basename } from 'path';
 
 task(
   'time:reactToPendingSnowSight',
@@ -59,7 +60,11 @@ task(
       hre
     ) => {
       // Parse parameters
-      prettyPrint('Arguments', prepare(args));
+      prettyPrint('Arguments', [
+        ['host', getHostname()],
+        ['script', basename(__filename)],
+        ...prepare(args),
+      ]);
       const { account, addressToMonitor, nMax, useTxPropagator, gasLimit, maxFeePerGas, maxPriorityFeePerGas,fastNonce, timeout } = args; // prettier-ignore
       // Transaction logger
       const txTracker = new TxTracker();

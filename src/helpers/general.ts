@@ -1,3 +1,5 @@
+import { hostname } from 'os';
+
 /**
  * Wait for n milliseconds
  */
@@ -47,4 +49,13 @@ export function wait(nMilliseconds: number = 0) {
 export function getSafeUrl(url: string | URL) {
   const u = new URL(url);
   return `${u.origin}/${u.pathname}`;
+}
+
+/**
+ * Get the hosting system's hostnam
+ *
+ * From https://stackoverflow.com/a/20554225/2972183
+ */
+export function getHostname(): string {
+  return hostname();
 }
